@@ -44,6 +44,18 @@ public class Video {
     public Video() {
     }
 
+    public Video(Long id, String title, String director, String actors, Integer year, String duration, String genre, String description, Integer quantity) {
+        this.id = id;
+        this.title = title;
+        this.director = director;
+        this.actors = actors;
+        this.year = year;
+        this.duration = duration;
+        this.genre = genre;
+        this.description = description;
+        this.quantity = quantity;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

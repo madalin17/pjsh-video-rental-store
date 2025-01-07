@@ -28,7 +28,7 @@ public class CacheService {
     /**
      * Stores recommendations in the cache with expiration time.
      */
-    public void storeRecommendationsInCache(Long customerId, List<Video> recommendations) {
+    public boolean storeRecommendationsInCache(Long customerId, List<Video> recommendations) {
         cache.put(customerId, new CacheEntry(recommendations, System.currentTimeMillis()));
     }
 

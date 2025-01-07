@@ -1,6 +1,6 @@
 package com.pjsh.vrs.audit.events;
 
-public class RatingEvent implements InteractionEvent {
+public class RatingEvent extends InteractionEvent {
     private Double score;
 
     public RatingEvent(Long customerId, Long videoId, Double score) {
