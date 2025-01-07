@@ -1,9 +1,7 @@
 package com.pjsh.vrs.service;
 
 import com.pjsh.vrs.entity.Video;
-import com.pjsh.vrs.entity.Rental;
 import com.pjsh.vrs.storage.VideoRepository;
-import com.pjsh.vrs.storage.RentalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
