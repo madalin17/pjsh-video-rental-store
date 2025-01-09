@@ -1,11 +1,9 @@
 package com.pjsh.vrs.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "reviews")
 public class Review extends Interaction {
 
     @ManyToOne(optional = false)

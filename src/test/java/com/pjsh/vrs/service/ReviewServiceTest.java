@@ -4,14 +4,17 @@ import com.pjsh.vrs.entity.Review;
 import com.pjsh.vrs.storage.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+@ExtendWith(MockitoExtension.class)
 public class ReviewServiceTest {
 
     @Mock
@@ -30,49 +33,38 @@ public class ReviewServiceTest {
 
     @Test
     public void testGetReviewsByVideoId() {
-        // Mock repository call
         when(reviewRepository.findByVideoId(1L)).thenReturn(List.of(review));
 
-        // Call service method
         List<Review> reviews = reviewService.getReviewsByVideoId(1L);
 
-        // Verify result
         assertThat(reviews).isNotEmpty();
         assertThat(reviews.get(0).getDescription()).isEqualTo("Great video!");
     }
 
     @Test
     public void testGetReviewsByCustomerId() {
-        // Mock repository call
         when(reviewRepository.findByCustomerId(1L)).thenReturn(List.of(review));
 
-        // Call service method
         List<Review> reviews = reviewService.getReviewsByCustomerId(1L);
 
-        // Verify result
         assertThat(reviews).isNotEmpty();
         assertThat(reviews.get(0).getDescription()).isEqualTo("Great video!");
     }
 
     @Test
     public void testAddReview() {
-        // Mock repository call
         when(reviewRepository.save(review)).thenReturn(review);
 
-        // Call service method
         Review addedReview = reviewService.addReview(review);
 
-        // Verify result
         assertThat(addedReview).isNotNull();
         assertThat(addedReview.getDescription()).isEqualTo("Great video!");
     }
 
     @Test
     public void testDeleteReview() {
-        // Call service method
         reviewService.deleteReview(1L);
 
-        // Verify that the repository method was called
         verify(reviewRepository, times(1)).deleteById(1L);
     }
 }

@@ -1,20 +1,33 @@
 package com.pjsh.vrs.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 import com.pjsh.vrs.entity.Video;
+import com.pjsh.vrs.service.provider.DefaultTimeProvider;
+import com.pjsh.vrs.service.provider.TimeProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@ExtendWith(MockitoExtension.class)
 class CacheServiceTest {
 
     private CacheService cacheService;
 
+    private TimeProvider timeProvider;
+
     @BeforeEach
     void setUp() {
+        timeProvider = Mockito.mock(TimeProvider.class);
+
         cacheService = new CacheService();
+        cacheService.setTimeProvider(timeProvider);
     }
 
     @Test
@@ -22,43 +35,40 @@ class CacheServiceTest {
         Long customerId = 1L;
         List<Video> recommendations = List.of(new Video(1L, "Title1", "Director1", "Actor1", 2021, "120min", "Drama", "Description", 5));
 
-        // Store recommendations in cache
         cacheService.storeRecommendationsInCache(customerId, recommendations);
 
-        // Retrieve recommendations from cache
         List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customerId);
 
-        // Verify that the cache contains the recommendations
         assertNotNull(cachedRecommendations);
         assertEquals(recommendations, cachedRecommendations);
     }
 
     @Test
-    void testCacheExpiration() throws InterruptedException {
+    void testCacheExpiration() {
         Long customerId = 2L;
-        List<Video> recommendations = List.of(new Video(2L, "Title2", "Director2", "Actor2", 2022, "130min", "Comedy", "Description", 4));
+        List<Video> recommendations = List.of(
+                new Video(2L, "Title2", "Director2", "Actor2", 2022, "130min", "Comedy", "Description", 4)
+        );
 
-        // Store recommendations in cache
+        Mockito.when(timeProvider.now()).thenReturn(1000L);
+
         cacheService.storeRecommendationsInCache(customerId, recommendations);
 
-        // Simulate a wait time that exceeds the TTL (10 minutes)
-        Thread.sleep(11 * 60 * 1000);  // Wait for 11 minutes
+        Mockito.when(timeProvider.now()).thenReturn(1000L + TimeUnit.MINUTES.toMillis(11));
 
-        // Try to retrieve recommendations after expiration
+//        cacheService.removeExpiredEntries();
+
         List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customerId);
-
-        // Verify that the cache has expired and no recommendations are returned
         assertNull(cachedRecommendations);
     }
+
 
     @Test
     void testCacheMiss() {
         Long customerId = 3L;
 
-        // Try to retrieve recommendations when cache is empty
         List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customerId);
 
-        // Verify that no recommendations are returned
         assertNull(cachedRecommendations);
     }
 }

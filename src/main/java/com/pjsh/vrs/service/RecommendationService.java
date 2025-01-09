@@ -57,7 +57,7 @@ public class RecommendationService {
     /**
      * Find videos similar to a given video based on attributes.
      */
-    private List<Video> findSimilarVideos(Video video, List<Video> allVideos) {
+    protected List<Video> findSimilarVideos(Video video, List<Video> allVideos) {
         return allVideos.stream()
                 .filter(v -> !v.getId().equals(video.getId())) // Exclude the original video
                 .filter(v -> isSimilar(video, v)) // Apply similarity logic

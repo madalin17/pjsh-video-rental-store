@@ -41,10 +41,9 @@ public class RentalService {
         rental.setCustomer(customer);
         rental.setVideo(video);
         rental.setRentalDate(LocalDate.now());
-        rental.setReturnDate(LocalDate.now().plusDays(14));  // Default rental period is 14 days
+        rental.setReturnDate(LocalDate.now().plusDays(14));
         rental.setStatus(RentalStatus.RENTED);
 
-        // Decrease video quantity
         video.setQuantity(video.getQuantity() - 1);
         videoRepository.save(video);
 

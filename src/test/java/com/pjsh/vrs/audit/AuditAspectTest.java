@@ -7,9 +7,12 @@ import com.pjsh.vrs.service.RentalService;
 import org.aspectj.lang.JoinPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
+@ExtendWith(MockitoExtension.class)
 class AuditAspectTest {
 
     @InjectMocks
@@ -31,14 +34,11 @@ class AuditAspectTest {
         Long customerId = 1L;
         Long videoId = 1L;
 
-        // Mock the JoinPoint to simulate the rentVideo method call
         JoinPoint joinPoint = mock(JoinPoint.class);
         when(joinPoint.getArgs()).thenReturn(new Object[] { customerId, videoId });
 
-        // Call the logRentAction method to trigger the event
         auditAspect.logRentAction(joinPoint);
 
-        // Verify that the event is published
         verify(applicationContext).publishEvent(any(RentalEvent.class));
     }
 

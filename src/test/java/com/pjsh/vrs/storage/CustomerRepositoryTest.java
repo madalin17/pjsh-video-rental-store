@@ -33,10 +33,8 @@ public class CustomerRepositoryTest {
 
     @Test
     public void testSaveAndFindById() {
-        // Save the customer
         customerRepository.save(customer1);
 
-        // Verify that the customer was saved and can be retrieved
         Customer foundCustomer = customerRepository.findById(customer1.getId()).orElse(null);
         assertThat(foundCustomer).isNotNull();
         assertThat(foundCustomer.getUsername()).isEqualTo("john_doe");
@@ -44,10 +42,8 @@ public class CustomerRepositoryTest {
 
     @Test
     public void testFindByEmail() {
-        // Save the customer
         customerRepository.save(customer1);
 
-        // Find by email
         Customer foundCustomer = customerRepository.findByEmail("john.doe@example.com");
         assertThat(foundCustomer).isNotNull();
         assertThat(foundCustomer.getEmail()).isEqualTo("john.doe@example.com");
@@ -55,24 +51,19 @@ public class CustomerRepositoryTest {
 
     @Test
     public void testDeleteCustomer() {
-        // Save the customer
         customerRepository.save(customer1);
 
-        // Delete the customer
         customerRepository.delete(customer1);
 
-        // Verify that the customer is deleted
         Customer foundCustomer = customerRepository.findById(customer1.getId()).orElse(null);
         assertThat(foundCustomer).isNull();
     }
 
     @Test
     public void testFindAllCustomers() {
-        // Save customers
         customerRepository.save(customer1);
         customerRepository.save(customer2);
 
-        // Verify that both customers are saved
         Iterable<Customer> customers = customerRepository.findAll();
         assertThat(customers).hasSize(2);
     }
