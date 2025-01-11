@@ -1,6 +1,8 @@
-package com.pjsh.vrs.service;
+package com.pjsh.vrs.mock.service;
 
 import com.pjsh.vrs.entity.Video;
+import com.pjsh.vrs.service.CacheService;
+import com.pjsh.vrs.service.RecommendationService;
 import com.pjsh.vrs.storage.VideoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,14 +13,15 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class RecommendationServiceTest {
@@ -78,5 +81,4 @@ public class RecommendationServiceTest {
                 list.containsAll(List.of(video2, video3)) && list.size() == 2
         ));
     }
-
 }

@@ -1,8 +1,11 @@
 package com.pjsh.vrs.audit;
 
 import com.pjsh.vrs.audit.events.RatingEvent;
-import com.pjsh.vrs.audit.events.RentalEvent;
+import com.pjsh.vrs.audit.events.RentEvent;
+import com.pjsh.vrs.audit.events.ReturnEvent;
 import com.pjsh.vrs.audit.events.ReviewEvent;
+import com.pjsh.vrs.entity.Rating;
+import com.pjsh.vrs.entity.Review;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -35,36 +38,31 @@ public class AuditAspect {
         Object[] methodArgs = joinPoint.getArgs();
         Long customerId = (Long) methodArgs[0];
         Long videoId = (Long) methodArgs[1];
-        RentalEvent event = new RentalEvent(customerId, videoId, "RENTAL");
+        RentEvent event = new RentEvent(customerId, videoId);
         applicationContext.publishEvent(event);
     }
 
     @Before("anyReturnVideo()")
     public void logReturnAction(JoinPoint joinPoint) {
         Object[] methodArgs = joinPoint.getArgs();
-        Long customerId = (Long) methodArgs[0];
-        Long videoId = (Long) methodArgs[1];
-        RentalEvent event = new RentalEvent(customerId, videoId, "RETURN");
+        Long rentalId = (Long) methodArgs[0];
+        ReturnEvent event = new ReturnEvent(rentalId);
         applicationContext.publishEvent(event);
     }
 
     @Before("anyAddReview()")
     public void logReviewAction(JoinPoint joinPoint) {
         Object[] methodArgs = joinPoint.getArgs();
-        Long customerId = (Long) methodArgs[0];
-        Long videoId = (Long) methodArgs[1];
-        String review = (String) methodArgs[2];
-        ReviewEvent event = new ReviewEvent(customerId, videoId, review);
+        Review review = (Review) methodArgs[0];
+        ReviewEvent event = new ReviewEvent(review.getCustomer().getId(), review.getVideo().getId(), review.getDescription());
         applicationContext.publishEvent(event);
     }
 
     @Before("anyAddRating()")
     public void logRatingAction(JoinPoint joinPoint) {
         Object[] methodArgs = joinPoint.getArgs();
-        Long customerId = (Long) methodArgs[0];
-        Long videoId = (Long) methodArgs[1];
-        Double score = (Double) methodArgs[2];
-        RatingEvent event = new RatingEvent(customerId, videoId, score);
+        Rating rating = (Rating) methodArgs[0];
+        RatingEvent event = new RatingEvent(rating.getCustomer().getId(), rating.getVideo().getId(), rating.getScore());
         applicationContext.publishEvent(event);
     }
 }

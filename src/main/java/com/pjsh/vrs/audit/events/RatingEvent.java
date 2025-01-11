@@ -1,14 +1,14 @@
 package com.pjsh.vrs.audit.events;
 
 public class RatingEvent extends InteractionEvent {
-    private Double score;
+    private Integer score;
 
-    public RatingEvent(Long customerId, Long videoId, Double score) {
+    public RatingEvent(Long customerId, Long videoId, Integer score) {
         super(customerId, videoId, "RATING");
         this.score = score;
     }
 
-    public Double getScore() {
+    public Integer getScore() {
         return score;
     }
 }

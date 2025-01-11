@@ -1,5 +1,6 @@
-package com.pjsh.vrs.controller;
+package com.pjsh.vrs.mock.controller;
 
+import com.pjsh.vrs.controller.CustomerController;
 import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.service.CustomerService;
 import org.junit.jupiter.api.BeforeEach;

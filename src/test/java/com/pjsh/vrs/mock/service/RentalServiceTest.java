@@ -1,9 +1,10 @@
-package com.pjsh.vrs.service;
+package com.pjsh.vrs.mock.service;
 
 import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Rental;
 import com.pjsh.vrs.entity.RentalStatus;
 import com.pjsh.vrs.entity.Video;
+import com.pjsh.vrs.service.RentalService;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.storage.RentalRepository;
 import com.pjsh.vrs.storage.VideoRepository;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 public class RentalServiceTest {
 

@@ -14,6 +14,14 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    public Customer registerCustomer(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
+    public void deleteCustomer(Long id) {
+        customerRepository.deleteById(id);
+    }
+
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
     }
@@ -24,14 +32,6 @@ public class CustomerService {
 
     public Customer getCustomerByEmail(String email) {
         return customerRepository.findByEmail(email);
-    }
-
-    public Customer registerCustomer(Customer customer) {
-        return customerRepository.save(customer);
-    }
-
-    public void deleteCustomer(Long id) {
-        customerRepository.deleteById(id);
     }
 }
 

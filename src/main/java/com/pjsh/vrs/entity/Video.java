@@ -3,6 +3,7 @@ package com.pjsh.vrs.entity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "videos")
@@ -55,6 +56,27 @@ public class Video {
         this.genre = genre;
         this.description = description;
         this.quantity = quantity;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, director, actors, year, duration, genre, description, quantity);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Video video = (Video) o;
+        return Objects.equals(year, video.year) &&
+                Objects.equals(quantity, video.quantity) &&
+                Objects.equals(id, video.id) &&
+                Objects.equals(title, video.title) &&
+                Objects.equals(director, video.director) &&
+                Objects.equals(actors, video.actors) &&
+                Objects.equals(duration, video.duration) &&
+                Objects.equals(genre, video.genre) &&
+                Objects.equals(description, video.description);
     }
 
     @Override

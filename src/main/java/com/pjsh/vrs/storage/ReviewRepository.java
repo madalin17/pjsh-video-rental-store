@@ -1,17 +1,36 @@
 package com.pjsh.vrs.storage;
 
 import com.pjsh.vrs.entity.Review;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    // Custom query to find all reviews for a specific video
+
     List<Review> findByVideoId(Long videoId);
 
-    // Custom query to find all reviews written by a specific customer
     List<Review> findByCustomerId(Long customerId);
+
+    @Query("SELECT r FROM Review r WHERE r.customer.id = :customerId")
+    List<Review> findAllByCustomerId(@Param("customerId") Long customerId);
+
+    @Query("SELECT r FROM Review r WHERE r.video.id = :videoId")
+    List<Review> findAllByVideoId(@Param("videoId") Long videoId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Review r WHERE r.video.id = :videoId")
+    void deleteAllByVideoId(@Param("videoId") Long videoId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Review r WHERE r.customer.id = :customerId")
+    void deleteAllByCustomerId(@Param("customerId") Long customerId);
 }
 

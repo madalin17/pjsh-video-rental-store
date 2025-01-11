@@ -1,6 +1,9 @@
-package com.pjsh.vrs.controller;
+package com.pjsh.vrs.mock.controller;
 
+import com.pjsh.vrs.controller.RatingController;
+import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Rating;
+import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.RatingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,14 +33,37 @@ public class RatingControllerTest {
 
     private MockMvc mockMvc;
 
+    private Video video;
+    private Customer customer;
     private Rating rating;
 
     @BeforeEach
     public void setUp() {
-        rating = new Rating();
-        rating.setScore(5);
-
         mockMvc = MockMvcBuilders.standaloneSetup(ratingController).build();
+
+        video = new Video();
+        video.setId(1L);
+        video.setTitle("Inception");
+        video.setDirector("Christopher Nolan");
+        video.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
+        video.setYear(2010);
+        video.setDuration("148 min");
+        video.setGenre("Sci-Fi");
+        video.setDescription("A mind-bending thriller about dreams within dreams.");
+        video.setQuantity(5);
+
+        customer = new Customer();
+        customer.setId(1L);
+        customer.setUsername("john_doe");
+        customer.setFullName("John Doe");
+        customer.setEmail("john.doe@example.com");
+        customer.setPassword("password123");
+
+        rating = new Rating();
+        rating.setId(1L);
+        rating.setVideo(video);
+        rating.setCustomer(customer);
+        rating.setScore(5);
     }
 
     @Test
@@ -65,12 +91,14 @@ public class RatingControllerTest {
         mockMvc.perform(post("/ratings")
                         .contentType("application/json")
                         .content("{\"score\":5}"))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.score").value(5));
     }
 
     @Test
     public void testDeleteRating() throws Exception {
+        doNothing().when(ratingService).deleteRating(1L);
+
         mockMvc.perform(delete("/ratings/{id}", 1L))
                 .andExpect(status().isOk());
 

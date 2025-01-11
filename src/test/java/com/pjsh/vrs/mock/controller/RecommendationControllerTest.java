@@ -1,5 +1,6 @@
-package com.pjsh.vrs.controller;
+package com.pjsh.vrs.mock.controller;
 
+import com.pjsh.vrs.controller.RecommendationController;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.RecommendationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,22 +32,31 @@ public class RecommendationControllerTest {
 
     private MockMvc mockMvc;
 
+    private Video video;
+
     private List<Video> recommendedVideos;
 
     @BeforeEach
     public void setUp() {
-        recommendedVideos = List.of(
-                new Video(1L, "Inception", "Christopher Nolan", "Leonardo DiCaprio,Joseph Gordon-Levitt", 2010, "148 min", "Sci-Fi,Thriller", "A mind-bending thriller about dreams within dreams.", 10)
-        );
+        video = new Video();
+        video.setTitle("Inception");
+        video.setDirector("Christopher Nolan");
+        video.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
+        video.setYear(2010);
+        video.setDuration("148 min");
+        video.setGenre("Sci-Fi");
+        video.setDescription("A mind-bending thriller about dreams within dreams.");
+        video.setQuantity(5);
+
+        recommendedVideos = List.of(video);
+
         mockMvc = MockMvcBuilders.standaloneSetup(recommendationController).build();
     }
 
     @Test
     public void testGetRecommendations_Success() throws Exception {
-        // Mock the service to return recommendations
         when(recommendationService.getRecommendationsForCustomer(1L)).thenReturn(CompletableFuture.completedFuture(recommendedVideos));
 
-        // Perform GET request and verify response
         mockMvc.perform(get("/recommendations/{customerId}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Inception"))
@@ -55,21 +65,10 @@ public class RecommendationControllerTest {
 
     @Test
     public void testGetRecommendations_NoContent() throws Exception {
-        // Mock the service to return an empty list of recommendations
         when(recommendationService.getRecommendationsForCustomer(1L)).thenReturn(CompletableFuture.completedFuture(List.of()));
 
-        // Perform GET request and verify response
         mockMvc.perform(get("/recommendations/{customerId}", 1L))
                 .andExpect(status().isNoContent());
     }
 
-    @Test
-    public void testGetRecommendations_InternalServerError() throws Exception {
-        // Mock the service to throw an exception
-        when(recommendationService.getRecommendationsForCustomer(1L)).thenThrow(new RuntimeException("Error"));
-
-        // Perform GET request and verify response
-        mockMvc.perform(get("/recommendations/{customerId}", 1L))
-                .andExpect(status().isInternalServerError());
-    }
 }

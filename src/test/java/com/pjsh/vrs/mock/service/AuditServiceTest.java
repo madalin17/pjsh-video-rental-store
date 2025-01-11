@@ -1,16 +1,20 @@
-package com.pjsh.vrs.service;
+package com.pjsh.vrs.mock.service;
 
 import static org.mockito.Mockito.*;
 
-import com.pjsh.vrs.audit.events.RentalEvent;
+import com.pjsh.vrs.audit.events.RentEvent;
+import com.pjsh.vrs.audit.events.ReturnEvent;
 import com.pjsh.vrs.audit.events.ReviewEvent;
 import com.pjsh.vrs.audit.events.RatingEvent;
+import com.pjsh.vrs.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class AuditServiceTest {
 
@@ -18,7 +22,10 @@ class AuditServiceTest {
     private AuditService auditService;
 
     @Mock
-    private RentalEvent rentalEvent;
+    private RentEvent rentEvent;
+
+    @Mock
+    private ReturnEvent returnEvent;
 
     @Mock
     private ReviewEvent reviewEvent;
@@ -33,15 +40,22 @@ class AuditServiceTest {
 
     @Test
     void testAuditRent() {
-        when(rentalEvent.getCustomerId()).thenReturn(1L);
-        when(rentalEvent.getVideoId()).thenReturn(1L);
-        when(rentalEvent.getEventType()).thenReturn("RENTAL");
+        when(rentEvent.getCustomerId()).thenReturn(1L);
+        when(rentEvent.getVideoId()).thenReturn(1L);
 
-        auditService.auditRent(rentalEvent);
+        auditService.auditRent(rentEvent);
 
-        verify(rentalEvent).getCustomerId();
-        verify(rentalEvent).getVideoId();
-        verify(rentalEvent).getEventType();
+        verify(rentEvent).getCustomerId();
+        verify(rentEvent).getVideoId();
+    }
+
+    @Test
+    void testAuditReturn() {
+        when(returnEvent.getRentalId()).thenReturn(1L);
+
+        auditService.auditReturn(returnEvent);
+
+        verify(returnEvent).getRentalId();
     }
 
     @Test
@@ -61,7 +75,7 @@ class AuditServiceTest {
     void testAuditRating() {
         when(ratingEvent.getCustomerId()).thenReturn(1L);
         when(ratingEvent.getVideoId()).thenReturn(1L);
-        when(ratingEvent.getScore()).thenReturn(4.5);
+        when(ratingEvent.getScore()).thenReturn(4);
 
         auditService.auditRating(ratingEvent);
 

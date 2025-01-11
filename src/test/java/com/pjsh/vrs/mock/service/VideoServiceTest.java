@@ -1,6 +1,7 @@
-package com.pjsh.vrs.service;
+package com.pjsh.vrs.mock.service;
 
 import com.pjsh.vrs.entity.Video;
+import com.pjsh.vrs.service.VideoService;
 import com.pjsh.vrs.storage.VideoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 public class VideoServiceTest {
 

@@ -1,5 +1,6 @@
-package com.pjsh.vrs.controller;
+package com.pjsh.vrs.mock.controller;
 
+import com.pjsh.vrs.controller.VideoController;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.VideoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -22,7 +22,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@AutoConfigureMockMvc
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -44,11 +43,23 @@ public class VideoControllerTest {
 
         video1 = new Video();
         video1.setTitle("Inception");
+        video1.setDirector("Christopher Nolan");
+        video1.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
+        video1.setYear(2010);
+        video1.setDuration("148 min");
         video1.setGenre("Sci-Fi");
+        video1.setDescription("A mind-bending thriller about dreams within dreams.");
+        video1.setQuantity(5);
 
         video2 = new Video();
         video2.setTitle("Titanic");
+        video2.setDirector("James Cameron");
+        video2.setActors("Leonardo DiCaprio, Kate Winslet");
+        video2.setYear(1997);
+        video2.setDuration("195 min");
         video2.setGenre("Romance");
+        video2.setDescription("A tragic love story set against the backdrop of the Titanic.");
+        video2.setQuantity(3);
     }
 
     @Test

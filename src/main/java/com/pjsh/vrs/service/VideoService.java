@@ -14,6 +14,18 @@ public class VideoService {
     @Autowired
     private VideoRepository videoRepository;
 
+    public Video addVideo(Video video) {
+        return videoRepository.save(video);
+    }
+
+    public Video getVideo(Long videoId) {
+        return videoRepository.getReferenceById(videoId);
+    }
+
+    public void deleteVideo(Long id) {
+        videoRepository.deleteById(id);
+    }
+
     public List<Video> getAllVideos() {
         return videoRepository.findAll();
     }
@@ -28,14 +40,6 @@ public class VideoService {
 
     public List<Video> getVideosByGenre(String genre) {
         return videoRepository.findByGenre(genre);
-    }
-
-    public Video addVideo(Video video) {
-        return videoRepository.save(video);
-    }
-
-    public void deleteVideo(Long id) {
-        videoRepository.deleteById(id);
     }
 }
 

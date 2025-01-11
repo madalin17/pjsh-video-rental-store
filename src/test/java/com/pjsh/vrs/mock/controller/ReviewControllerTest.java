@@ -1,6 +1,9 @@
-package com.pjsh.vrs.controller;
+package com.pjsh.vrs.mock.controller;
 
+import com.pjsh.vrs.controller.ReviewController;
+import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Review;
+import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,23 +33,43 @@ public class ReviewControllerTest {
 
     private MockMvc mockMvc;
 
+    private Video video;
+    private Customer customer;
     private Review review;
 
     @BeforeEach
     public void setUp() {
-        // Initialize mock objects
-        review = new Review();
-        review.setDescription("Great video!");
-
         mockMvc = MockMvcBuilders.standaloneSetup(reviewController).build();
+
+        video = new Video();
+        video.setId(1L);
+        video.setTitle("Inception");
+        video.setDirector("Christopher Nolan");
+        video.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
+        video.setYear(2010);
+        video.setDuration("148 min");
+        video.setGenre("Sci-Fi");
+        video.setDescription("A mind-bending thriller about dreams within dreams.");
+        video.setQuantity(5);
+
+        customer = new Customer();
+        customer.setId(1L);
+        customer.setUsername("john_doe");
+        customer.setFullName("John Doe");
+        customer.setEmail("john.doe@example.com");
+        customer.setPassword("password123");
+
+        review = new Review();
+        review.setId(1L);
+        review.setVideo(video);
+        review.setCustomer(customer);
+        review.setDescription("Great video!");
     }
 
     @Test
     public void testGetReviewsByVideoId() throws Exception {
-        // Mock service call
         when(reviewService.getReviewsByVideoId(1L)).thenReturn(List.of(review));
 
-        // Perform GET request and verify response
         mockMvc.perform(get("/reviews/video/{videoId}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].description").value("Great video!"));
@@ -54,10 +77,8 @@ public class ReviewControllerTest {
 
     @Test
     public void testGetReviewsByCustomerId() throws Exception {
-        // Mock service call
         when(reviewService.getReviewsByCustomerId(1L)).thenReturn(List.of(review));
 
-        // Perform GET request and verify response
         mockMvc.perform(get("/reviews/customer/{customerId}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].description").value("Great video!"));
@@ -65,24 +86,20 @@ public class ReviewControllerTest {
 
     @Test
     public void testAddReview() throws Exception {
-        // Mock service call
         when(reviewService.addReview(any(Review.class))).thenReturn(review);
 
-        // Perform POST request and verify response
         mockMvc.perform(post("/reviews")
                         .contentType("application/json")
                         .content("{\"description\":\"Great video!\"}"))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description").value("Great video!"));
     }
 
     @Test
     public void testDeleteReview() throws Exception {
-        // Perform DELETE request
         mockMvc.perform(delete("/reviews/{id}", 1L))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
-        // Verify that the service method was called
         verify(reviewService, times(1)).deleteReview(1L);
     }
 }

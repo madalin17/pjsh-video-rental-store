@@ -10,12 +10,12 @@ import java.util.List;
 
 @Repository
 public interface VideoRepository extends JpaRepository<Video, Long> {
-    // Custom query to find videos by title
     List<Video> findByTitleContainingIgnoreCase(String title);
 
-    // Custom query to find videos by genre
     List<Video> findByGenre(String genre);
 
     @Query("SELECT v FROM Video v JOIN Rental r ON v.id = r.video.id WHERE r.customer.id = :customerId")
     List<Video> findRentedByCustomerId(@Param("customerId") Long customerId);
+
+
 }

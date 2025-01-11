@@ -8,4 +8,8 @@ public class DefaultTimeProvider implements TimeProvider {
     public long now() {
         return System.currentTimeMillis();
     }
+
+    @Override
+    public void advanceTime(long milliseconds) {
+    }
 }

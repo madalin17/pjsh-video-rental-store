@@ -27,16 +27,13 @@ public class RentalService {
     private CustomerRepository customerRepository;
 
     public Rental rentVideo(Long customerId, Long videoId) {
-        // Check if the video exists and is available
         Video video = videoRepository.findById(videoId).orElseThrow(() -> new EntityNotFoundException("Video not found"));
         if (!video.isAvailable()) {
             throw new IllegalStateException("Video is out of stock");
         }
 
-        // Check if the customer exists
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException("Customer not found"));
 
-        // Create a new rental
         Rental rental = new Rental();
         rental.setCustomer(customer);
         rental.setVideo(video);
@@ -57,11 +54,9 @@ public class RentalService {
             throw new IllegalStateException("Video already returned");
         }
 
-        // Update the rental status and the return date
         rental.setStatus(RentalStatus.RETURNED);
         rental.setReturnDate(LocalDate.now());
 
-        // Increase video quantity
         Video video = rental.getVideo();
         video.setQuantity(video.getQuantity() + 1);
         videoRepository.save(video);
@@ -70,10 +65,8 @@ public class RentalService {
     }
 
     public List<Rental> getRentalHistory(Long customerId) {
-        // Ensure the customer exists
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException("Customer not found"));
 
-        // Fetch rental history for the given customer
         return rentalRepository.findByCustomer(customer);
     }
 }
