@@ -1,25 +1,26 @@
-package com.pjsh.vrs.mock.storage;
+package com.pjsh.vrs.integration.storage;
 
+import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Rating;
 import com.pjsh.vrs.entity.Video;
-import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.storage.RatingRepository;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class RatingRepositoryTest {
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class RatingRepositoryIntegrationTest {
 
     @Autowired
     private RatingRepository ratingRepository;
@@ -30,12 +31,15 @@ public class RatingRepositoryTest {
     @Autowired
     private CustomerRepository customerRepository;
 
-    private Rating rating;
     private Video video1, video2;
     private Customer customer1, customer2;
 
     @BeforeEach
     public void setUp() {
+        ratingRepository.deleteAll();
+        videoRepository.deleteAll();
+        customerRepository.deleteAll();
+
         video1 = new Video();
         video1.setTitle("Inception");
         video1.setDirector("Christopher Nolan");
@@ -89,6 +93,13 @@ public class RatingRepositoryTest {
         rating3.setCustomer(customer1);
         rating3.setScore(3);
         ratingRepository.save(rating3);
+    }
+
+    @AfterAll
+    public void cleanUp() {
+        ratingRepository.deleteAll();
+        videoRepository.deleteAll();
+        customerRepository.deleteAll();
     }
 
     @Test

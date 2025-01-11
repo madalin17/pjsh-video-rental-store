@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "customers")
@@ -49,6 +50,22 @@ public class Customer {
                 .append(password);
 
         return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Customer customer = (Customer) o;
+        return Objects.equals(id, customer.id) &&
+                Objects.equals(username, customer.username) &&
+                Objects.equals(fullName, customer.fullName) &&
+                Objects.equals(email, customer.email) &&
+                Objects.equals(password, customer.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, fullName, email, password);
     }
 
     public Long getId() {

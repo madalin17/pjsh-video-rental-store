@@ -7,21 +7,18 @@ import com.pjsh.vrs.entity.RentalStatus;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.storage.RentalRepository;
 import com.pjsh.vrs.storage.VideoRepository;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@Transactional
+@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class VideoRepositoryIntegrationTest {
 

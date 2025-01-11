@@ -1,10 +1,11 @@
 package com.pjsh.vrs.integration.storage;
 
 import com.pjsh.vrs.entity.Customer;
-import com.pjsh.vrs.entity.Review;
+import com.pjsh.vrs.entity.Rental;
+import com.pjsh.vrs.entity.RentalStatus;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.storage.CustomerRepository;
-import com.pjsh.vrs.storage.ReviewRepository;
+import com.pjsh.vrs.storage.RentalRepository;
 import com.pjsh.vrs.storage.VideoRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,14 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ReviewRepositoryIntegrationTest {
+public class RentalRepositoryIntegrationTest {
 
     @Autowired
-    private ReviewRepository reviewRepository;
+    private RentalRepository rentalRepository;
 
     @Autowired
     private VideoRepository videoRepository;
@@ -30,12 +31,13 @@ public class ReviewRepositoryIntegrationTest {
     @Autowired
     private CustomerRepository customerRepository;
 
-    private Video video1, video2;
     private Customer customer1, customer2;
+    private Video video1, video2;
+    private Rental rental1, rental2, rental3;
 
     @BeforeEach
-    void setUp() {
-        reviewRepository.deleteAll();
+    public void setUp() {
+        rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
 
@@ -75,72 +77,66 @@ public class ReviewRepositoryIntegrationTest {
         customer2.setPassword("password456");
         customerRepository.save(customer2);
 
-        Review review1 = new Review();
-        review1.setCustomer(customer1);
-        review1.setVideo(video1);
-        review1.setDescription("Great movie!");
-        reviewRepository.save(review1);
+        rental1 = new Rental();
+        rental1.setCustomer(customer1);
+        rental1.setVideo(video1);
+        rental1.setStatus(RentalStatus.RENTED);
+        rentalRepository.save(rental1);
 
-        Review review2 = new Review();
-        review2.setCustomer(customer2);
-        review2.setVideo(video2);
-        review2.setDescription("Mind-blowing visuals.");
-        reviewRepository.save(review2);
+        rental2 = new Rental();
+        rental2.setCustomer(customer1);
+        rental2.setVideo(video2);
+        rental2.setStatus(RentalStatus.RETURNED);
+        rentalRepository.save(rental2);
 
-        Review review3 = new Review();
-        review3.setCustomer(customer1);
-        review3.setVideo(video2);
-        review3.setDescription("Damn.");
-        reviewRepository.save(review3);
+        rental3 = new Rental();
+        rental3.setCustomer(customer2);
+        rental3.setVideo(video1);
+        rental3.setStatus(RentalStatus.RENTED);
+        rentalRepository.save(rental3);
     }
 
     @AfterAll
     public void cleanUp() {
-        reviewRepository.deleteAll();
+        rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    void testFindByVideoId() {
-        List<Review> reviews = reviewRepository.findByVideoId(video1.getId());
-        assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getDescription()).isEqualTo("Great movie!");
+    public void testFindByCustomer() {
+        List<Rental> rentals = rentalRepository.findByCustomer(customer1);
+
+        assertNotNull(rentals);
+        assertEquals(2, rentals.size());
+        assertTrue(rentals.stream().anyMatch(r -> r.getVideo().equals(video1)));
+        assertTrue(rentals.stream().anyMatch(r -> r.getVideo().equals(video2)));
     }
 
     @Test
-    void testFindByCustomerId() {
-        List<Review> reviews = reviewRepository.findByCustomerId(customer2.getId());
-        assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getCustomer().getFullName()).isEqualTo("Jane Doe");
+    public void testFindByVideo() {
+        List<Rental> rentals = rentalRepository.findByVideo(video1);
+
+        assertNotNull(rentals);
+        assertEquals(2, rentals.size());
+        assertTrue(rentals.stream().anyMatch(r -> r.getCustomer().equals(customer1)));
+        assertTrue(rentals.stream().anyMatch(r -> r.getCustomer().equals(customer2)));
     }
 
     @Test
-    void testFindAllByVideoId() {
-        List<Review> reviews = reviewRepository.findAllByVideoId(video1.getId());
-        assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getVideo().getTitle()).isEqualTo("Inception");
-    }
+    public void testFindByStatus() {
+        List<Rental> rented = rentalRepository.findByStatus(RentalStatus.RENTED);
 
-    @Test
-    void testFindAllByCustomerId() {
-        List<Review> reviews = reviewRepository.findAllByCustomerId(customer2.getId());
-        assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getDescription()).isEqualTo("Mind-blowing visuals.");
-    }
+        assertNotNull(rented);
+        assertEquals(2, rented.size());
+        assertTrue(rented.stream().anyMatch(r -> r.getVideo().equals(video1)));
+        assertTrue(rented.stream().anyMatch(r -> r.getCustomer().equals(customer2)));
 
-    @Test
-    void testDeleteAllByVideoId() {
-        reviewRepository.deleteAllByVideoId(video1.getId());
-        List<Review> reviews = reviewRepository.findByVideoId(video1.getId());
-        assertThat(reviews).isEmpty();
-    }
+        List<Rental> returned = rentalRepository.findByStatus(RentalStatus.RETURNED);
 
-    @Test
-    void testDeleteAllByCustomerId() {
-        reviewRepository.deleteAllByCustomerId(customer1.getId());
-        List<Review> reviews = reviewRepository.findByCustomerId(customer1.getId());
-        assertThat(reviews).isEmpty();
+        assertNotNull(returned);
+        assertEquals(1, returned.size());
+        assertEquals(video2, returned.get(0).getVideo());
+        assertEquals(customer1, returned.get(0).getCustomer());
     }
 }
-
