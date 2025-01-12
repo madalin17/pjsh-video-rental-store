@@ -25,20 +25,12 @@ public class RatingService {
         ratingRepository.deleteById(id);
     }
 
-    public List<Rating> getRatingsByVideoId(Long videoId) {
+    public List<Rating> findByVideoId(Long videoId) {
         return ratingRepository.findByVideoId(videoId);
     }
 
-    public List<Rating> getRatingsByCustomerId(Long customerId) {
+    public List<Rating> findByCustomerId(Long customerId) {
         return ratingRepository.findByCustomerId(customerId);
-    }
-
-    public void findAllByVideoId(Long videoId) {
-        ratingRepository.findAllByVideoId(videoId);
-    }
-
-    public void findAllByCustomerId(Long customerId) {
-        ratingRepository.findAllByCustomerId(customerId);
     }
 
     public void deleteAllByVideoId(Long videoId) {

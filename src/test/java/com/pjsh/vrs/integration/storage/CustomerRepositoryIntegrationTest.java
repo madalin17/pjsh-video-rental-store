@@ -7,36 +7,40 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class CustomerRepositoryIntegrationTest {
 
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
     private Customer customer1, customer2;
+
+    private Customer testCustomer1, testCustomer2;
+
+    @Value("${customer1.fullName}")
+    private String customer1FullName;
+    @Value("${customer1.email}")
+    private String customer1Email;
+    @Value("${noCustomer.email}")
+    private String noCustomerEmail;
 
     @BeforeEach
     public void setUp() {
         customerRepository.deleteAll();
 
-        customer1 = new Customer();
-        customer1.setUsername("john_doe");
-        customer1.setFullName("John Doe");
-        customer1.setEmail("john.doe@example.com");
-        customer1.setPassword("password123");
-        customerRepository.save(customer1);
-
-        customer2 = new Customer();
-        customer2.setUsername("jane_doe");
-        customer2.setFullName("Jane Doe");
-        customer2.setEmail("jane.doe@example.com");
-        customer2.setPassword("password456");
-        customerRepository.save(customer2);
+        testCustomer1 = customerRepository.save(new Customer(customer1));
+        testCustomer2 = customerRepository.save(new Customer(customer2));
     }
 
     @AfterAll
@@ -46,49 +50,41 @@ public class CustomerRepositoryIntegrationTest {
 
     @Test
     public void testSaveCustomer() {
-        Customer customer = new Customer();
-        customer.setUsername("alice_malice");
-        customer.setFullName("Alice Johnson");
-        customer.setEmail("alice.johnson@example.com");
-        customer.setPassword("555555555");
-
-        Customer savedCustomer = customerRepository.save(customer);
-
-        assertNotNull(savedCustomer.getId());
-        assertEquals("Alice Johnson", savedCustomer.getFullName());
-        assertEquals("alice.johnson@example.com", savedCustomer.getEmail());
+        assertNotNull(testCustomer1.getId());
+        assertEquals(customer1FullName, testCustomer1.getFullName());
+        assertEquals(customer1Email, testCustomer1.getEmail());
     }
 
     @Test
     public void testFindByEmail() {
-        Customer foundCustomer = customerRepository.findByEmail("john.doe@example.com");
+        Customer foundCustomer = customerRepository.findByEmail(customer1Email);
 
         assertNotNull(foundCustomer);
-        assertEquals("John Doe", foundCustomer.getFullName());
-        assertEquals("john.doe@example.com", foundCustomer.getEmail());
+        assertEquals(customer1FullName, foundCustomer.getFullName());
+        assertEquals(customer1Email, foundCustomer.getEmail());
     }
 
     @Test
     public void testFindByEmailNotFound() {
-        Customer foundCustomer = customerRepository.findByEmail("non.existent@example.com");
+        Customer foundCustomer = customerRepository.findByEmail(noCustomerEmail);
 
         assertNull(foundCustomer);
     }
 
     @Test
     public void testDeleteCustomer() {
-        customerRepository.delete(customer1);
+        customerRepository.delete(testCustomer1);
 
-        Customer deletedCustomer = customerRepository.findByEmail("john.doe@example.com");
+        Customer deletedCustomer = customerRepository.findByEmail(customer1Email);
 
         assertNull(deletedCustomer);
     }
 
     @Test
     public void testCustomerPersistence() {
-        customerRepository.save(customer1);
+        customerRepository.save(testCustomer1);
 
-        Customer persistedCustomer = customerRepository.findByEmail("john.doe@example.com");
+        Customer persistedCustomer = customerRepository.findByEmail(customer1Email);
 
         assertNotNull(persistedCustomer);
         assertEquals(customer1.getFullName(), persistedCustomer.getFullName());

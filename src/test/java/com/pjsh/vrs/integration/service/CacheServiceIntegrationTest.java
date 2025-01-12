@@ -10,7 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class CacheServiceIntegrationTest {
 
     @Autowired
@@ -29,7 +34,15 @@ public class CacheServiceIntegrationTest {
     @Autowired
     private VideoRepository videoRepository;
 
-    private Video video1, video2;
+    @Autowired
+    private Video video1, video2, video3;
+
+    private Video testVideo1, testVideo2;
+
+    @Value("${video1.title}")
+    private String video1Title;
+    @Value("${video2.title}")
+    private String video2Title;
 
     @BeforeEach
     public void setUp() {
@@ -38,27 +51,8 @@ public class CacheServiceIntegrationTest {
         timeProvider = new TestTimeProvider(System.currentTimeMillis());
         cacheService.setTimeProvider(timeProvider);
 
-        video1 = new Video();
-        video1.setTitle("Inception");
-        video1.setDirector("Christopher Nolan");
-        video1.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video1.setYear(2010);
-        video1.setDuration("148 min");
-        video1.setGenre("Sci-Fi");
-        video1.setDescription("A mind-bending thriller about dreams within dreams.");
-        video1.setQuantity(5);
-        videoRepository.save(video1);
-
-        video2 = new Video();
-        video2.setTitle("Titanic");
-        video2.setDirector("James Cameron");
-        video2.setActors("Leonardo DiCaprio, Kate Winslet");
-        video2.setYear(1997);
-        video2.setDuration("195 min");
-        video2.setGenre("Romance");
-        video2.setDescription("A tragic love story set against the backdrop of the Titanic.");
-        video2.setQuantity(3);
-        videoRepository.save(video2);
+        testVideo1 = videoRepository.save(new Video(video1));
+        testVideo2 = videoRepository.save(new Video(video2));
     }
 
     @AfterAll
@@ -70,14 +64,14 @@ public class CacheServiceIntegrationTest {
     public void testStoreAndRetrieveRecommendationsFromCache() {
         Long customerId = 1L;
 
-        cacheService.storeRecommendationsInCache(customerId, List.of(video1, video2));
+        cacheService.storeRecommendationsInCache(customerId, List.of(testVideo1, testVideo2));
 
         List<Video> cachedVideos = cacheService.getRecommendationsFromCache(customerId);
 
         assertNotNull(cachedVideos);
         assertEquals(2, cachedVideos.size());
-        assertEquals("Inception", cachedVideos.get(0).getTitle());
-        assertEquals("Titanic", cachedVideos.get(1).getTitle());
+        assertEquals(video1Title, cachedVideos.get(0).getTitle());
+        assertEquals(video2Title, cachedVideos.get(1).getTitle());
     }
 
     @Test
@@ -93,7 +87,7 @@ public class CacheServiceIntegrationTest {
     public void testCacheExpiration() {
         Long customerId = 1L;
 
-        cacheService.storeRecommendationsInCache(customerId, List.of(video1, video2));
+        cacheService.storeRecommendationsInCache(customerId, List.of(testVideo1, testVideo2));
 
         List<Video> cachedVideos = cacheService.getRecommendationsFromCache(customerId);
         assertNotNull(cachedVideos);

@@ -11,7 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class RatingServiceIntegrationTest {
 
     @Autowired
@@ -31,10 +36,28 @@ public class RatingServiceIntegrationTest {
     @Autowired
     private CustomerRepository customerRepository;
 
-    private Customer customer1;
-    private Customer customer2;
+    @Autowired
     private Video video1;
-    private Video video2;
+
+    @Autowired
+    private Customer customer1, customer2;
+
+    private Video testVideo1;
+
+    private Customer testCustomer1, testCustomer2;
+
+    private Rating testRating1, testRating2, testRating3;
+
+    @Value("${rating1.score}")
+    private Integer rating1Score;
+    @Value("${rating2.score}")
+    private Integer rating2Score;
+    @Value("${rating3.score}")
+    private Integer rating3Score;
+    @Value("${video1.title}")
+    private String video1Title;
+    @Value("${customer2.email}")
+    private String customer2Email;
 
     @BeforeEach
     public void setUp() {
@@ -42,41 +65,13 @@ public class RatingServiceIntegrationTest {
         videoRepository.deleteAll();
         customerRepository.deleteAll();
 
-        video1 = new Video();
-        video1.setTitle("Inception");
-        video1.setDirector("Christopher Nolan");
-        video1.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video1.setYear(2010);
-        video1.setDuration("148 min");
-        video1.setGenre("Sci-Fi");
-        video1.setDescription("A mind-bending thriller about dreams within dreams.");
-        video1.setQuantity(5);
-        videoRepository.save(video1);
+        testVideo1 = videoRepository.save(new Video(video1));
 
-        video2 = new Video();
-        video2.setTitle("Titanic");
-        video2.setDirector("James Cameron");
-        video2.setActors("Leonardo DiCaprio, Kate Winslet");
-        video2.setYear(1997);
-        video2.setDuration("195 min");
-        video2.setGenre("Romance");
-        video2.setDescription("A tragic love story set against the backdrop of the Titanic.");
-        video2.setQuantity(3);
-        videoRepository.save(video2);
+        testCustomer1 = customerRepository.save(new Customer(customer1));
+        testCustomer2 = customerRepository.save(new Customer(customer2));
 
-        customer1 = new Customer();
-        customer1.setUsername("john_doe");
-        customer1.setFullName("John Doe");
-        customer1.setEmail("john.doe@example.com");
-        customer1.setPassword("password123");
-        customerRepository.save(customer1);
-
-        customer2 = new Customer();
-        customer2.setUsername("jane_doe");
-        customer2.setFullName("Jane Doe");
-        customer2.setEmail("jane.doe@example.com");
-        customer2.setPassword("password456");
-        customerRepository.save(customer2);
+        testRating1 = ratingRepository.save(new Rating(testVideo1, testCustomer1, rating1Score));
+        testRating2 = ratingRepository.save(new Rating(testVideo1, testCustomer2, rating2Score));
     }
 
     @AfterAll
@@ -88,59 +83,30 @@ public class RatingServiceIntegrationTest {
 
     @Test
     public void testAddMultipleRatings() {
-        Rating rating1 = new Rating();
-        rating1.setScore(5);
-        rating1.setCustomer(customer1);
-        rating1.setVideo(video1);
-        ratingRepository.save(rating1);
+        List<Rating> ratings = ratingRepository.findByVideoId(testVideo1.getId());
 
-        Rating rating2 = new Rating();
-        rating2.setScore(3);
-        rating2.setCustomer(customer2);
-        rating2.setVideo(video1);
-        ratingRepository.save(rating2);
-
-        List<Rating> ratings = ratingRepository.findByVideoId(video1.getId());
         assertThat(ratings).hasSize(2);
-        assertThat(ratings.get(0).getScore()).isEqualTo(5);
-        assertThat(ratings.get(1).getScore()).isEqualTo(3);
+        assertThat(ratings.get(0).getScore()).isEqualTo(rating1Score);
+        assertThat(ratings.get(1).getScore()).isEqualTo(rating2Score);
     }
 
     @Test
     public void testUpdateRating() {
-        Rating rating = new Rating();
-        rating.setScore(4);
-        rating.setCustomer(customer1);
-        rating.setVideo(video2);
-        Rating savedRating = ratingRepository.save(rating);
+        testRating2 = ratingRepository.save(new Rating(testVideo1, testCustomer2, rating3Score));
 
-        savedRating.setScore(5);
-        Rating updatedRating = ratingRepository.save(savedRating);
+        Rating updatedRating = ratingRepository.save(testRating2);
 
-        assertThat(updatedRating.getScore()).isEqualTo(5);
-        assertThat(updatedRating.getCustomer().getEmail()).isEqualTo("john.doe@example.com");
-        assertThat(updatedRating.getVideo().getTitle()).isEqualTo("Titanic");
+        assertThat(updatedRating.getVideo().getTitle()).isEqualTo(video1Title);
+        assertThat(updatedRating.getCustomer().getEmail()).isEqualTo(customer2Email);
+        assertThat(updatedRating.getScore()).isEqualTo(rating3Score);
     }
 
     @Test
     public void testFindRatingsByCustomerId() {
-        Rating rating1 = new Rating();
-        rating1.setScore(5);
-        rating1.setCustomer(customer1);
-        rating1.setVideo(video1);
-        ratingRepository.save(rating1);
+        List<Rating> ratings = ratingRepository.findByCustomerId(testCustomer1.getId());
 
-        Rating rating2 = new Rating();
-        rating2.setScore(4);
-        rating2.setCustomer(customer1);
-        rating2.setVideo(video2);
-        ratingRepository.save(rating2);
-
-        List<Rating> ratings = ratingRepository.findByCustomerId(customer1.getId());
-
-        assertThat(ratings).hasSize(2);
-        assertThat(ratings.get(0).getScore()).isEqualTo(5);
-        assertThat(ratings.get(1).getScore()).isEqualTo(4);
+        assertThat(ratings).hasSize(1);
+        assertThat(ratings.get(0).getScore()).isEqualTo(rating1Score);
     }
 
     @Test
@@ -152,18 +118,6 @@ public class RatingServiceIntegrationTest {
 
     @Test
     public void testDeleteAllRatingsForVideo() {
-        Rating rating1 = new Rating();
-        rating1.setScore(5);
-        rating1.setCustomer(customer1);
-        rating1.setVideo(video1);
-        ratingRepository.save(rating1);
-
-        Rating rating2 = new Rating();
-        rating2.setScore(3);
-        rating2.setCustomer(customer2);
-        rating2.setVideo(video1);
-        ratingRepository.save(rating2);
-
         ratingRepository.deleteAllByVideoId(video1.getId());
 
         List<Rating> ratings = ratingRepository.findByVideoId(video1.getId());
@@ -172,18 +126,6 @@ public class RatingServiceIntegrationTest {
 
     @Test
     public void testDeleteAllRatingsForCustomer() {
-        Rating rating1 = new Rating();
-        rating1.setScore(4);
-        rating1.setCustomer(customer2);
-        rating1.setVideo(video2);
-        ratingRepository.save(rating1);
-
-        Rating rating2 = new Rating();
-        rating2.setScore(5);
-        rating2.setCustomer(customer2);
-        rating2.setVideo(video1);
-        ratingRepository.save(rating2);
-
         ratingRepository.deleteAllByCustomerId(customer2.getId());
 
         List<Rating> ratings = ratingRepository.findByCustomerId(customer2.getId());
@@ -192,33 +134,16 @@ public class RatingServiceIntegrationTest {
 
     @Test
     public void testFindRatingById() {
-        Rating rating = new Rating();
-        rating.setScore(3);
-        rating.setCustomer(customer1);
-        rating.setVideo(video1);
-        Rating savedRating = ratingRepository.save(rating);
+        Optional<Rating> foundRating = ratingRepository.findById(testRating1.getId());
 
-        Optional<Rating> foundRating = ratingRepository.findById(savedRating.getId());
         assertThat(foundRating).isPresent();
-        assertThat(foundRating.get().getScore()).isEqualTo(3);
+        assertThat(foundRating.get().getScore()).isEqualTo(rating1Score);
     }
 
     @Test
     public void testFindAverageScoreForVideo() {
-        Rating rating1 = new Rating();
-        rating1.setScore(5);
-        rating1.setCustomer(customer1);
-        rating1.setVideo(video1);
-        ratingRepository.save(rating1);
+        Double averageScore = ratingRepository.calculateAverageScoreByVideoId(testVideo1.getId());
 
-        Rating rating2 = new Rating();
-        rating2.setScore(3);
-        rating2.setCustomer(customer2);
-        rating2.setVideo(video1);
-        ratingRepository.save(rating2);
-
-        Double averageScore = ratingRepository.calculateAverageScoreByVideoId(video1.getId());
-
-        assertThat(averageScore).isEqualTo(4.0);
+        assertThat(averageScore).isEqualTo((double) (rating1Score + rating2Score) / 2);
     }
 }

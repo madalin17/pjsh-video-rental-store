@@ -1,5 +1,7 @@
 package com.pjsh.vrs.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.Objects;
 @Table(name = "videos")
 public class Video {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,9 +40,11 @@ public class Video {
     @Column(nullable = false)
     private Integer quantity;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rating> ratings = new ArrayList<>();
 
@@ -56,6 +61,18 @@ public class Video {
         this.genre = genre;
         this.description = description;
         this.quantity = quantity;
+    }
+
+    public Video(Video video) {
+        this.id = video.id;
+        this.title = video.title;
+        this.director = video.director;
+        this.actors = video.actors;
+        this.year = video.year;
+        this.duration = video.duration;
+        this.genre = video.genre;
+        this.description = video.description;
+        this.quantity = video.quantity;
     }
 
     @Override

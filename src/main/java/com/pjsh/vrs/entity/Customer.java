@@ -1,5 +1,7 @@
 package com.pjsh.vrs.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.Objects;
 @Table(name = "customers")
 public class Customer {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,13 +29,23 @@ public class Customer {
     @Column(nullable = false)
     private String password;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rating> ratings = new ArrayList<>();
 
     public Customer() {
+    }
+
+    public Customer(Customer customer) {
+        this.id = customer.id;
+        this.username = customer.username;
+        this.fullName = customer.fullName;
+        this.email = customer.email;
+        this.password = customer.password;
     }
 
     @Override

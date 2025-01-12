@@ -68,7 +68,7 @@ public class ReviewControllerTest {
 
     @Test
     public void testGetReviewsByVideoId() throws Exception {
-        when(reviewService.getReviewsByVideoId(1L)).thenReturn(List.of(review));
+        when(reviewService.findByVideoId(1L)).thenReturn(List.of(review));
 
         mockMvc.perform(get("/reviews/video/{videoId}", 1L))
                 .andExpect(status().isOk())
@@ -77,7 +77,7 @@ public class ReviewControllerTest {
 
     @Test
     public void testGetReviewsByCustomerId() throws Exception {
-        when(reviewService.getReviewsByCustomerId(1L)).thenReturn(List.of(review));
+        when(reviewService.findByCustomerId(1L)).thenReturn(List.of(review));
 
         mockMvc.perform(get("/reviews/customer/{customerId}", 1L))
                 .andExpect(status().isOk())

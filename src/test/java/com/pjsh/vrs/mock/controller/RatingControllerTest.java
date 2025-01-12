@@ -68,7 +68,7 @@ public class RatingControllerTest {
 
     @Test
     public void testGetRatingsByVideoId() throws Exception {
-        when(ratingService.getRatingsByVideoId(1L)).thenReturn(List.of(rating));
+        when(ratingService.findByVideoId(1L)).thenReturn(List.of(rating));
 
         mockMvc.perform(get("/ratings/video/{videoId}", 1L))
                 .andExpect(status().isOk())
@@ -77,7 +77,7 @@ public class RatingControllerTest {
 
     @Test
     public void testGetRatingsByCustomerId() throws Exception {
-        when(ratingService.getRatingsByCustomerId(1L)).thenReturn(List.of(rating));
+        when(ratingService.findByCustomerId(1L)).thenReturn(List.of(rating));
 
         mockMvc.perform(get("/ratings/customer/{customerId}", 1L))
                 .andExpect(status().isOk())

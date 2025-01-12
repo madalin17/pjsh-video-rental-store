@@ -14,7 +14,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -26,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class RentalServiceIntegrationTest {
 
     @Autowired
@@ -40,8 +45,18 @@ public class RentalServiceIntegrationTest {
     @Autowired
     private RentalRepository rentalRepository;
 
-    private Customer customer;
-    private Video video;
+    @Autowired
+    private Video video1;
+
+    @Autowired
+    private Customer customer1;
+
+    private Video testVideo1;
+
+    private Customer testCustomer1;
+
+    @Value("${video1.title}")
+    private String video1Title;
 
     @BeforeEach
     public void setUp() {
@@ -49,23 +64,9 @@ public class RentalServiceIntegrationTest {
         videoRepository.deleteAll();
         customerRepository.deleteAll();
 
-        video = new Video();
-        video.setTitle("Inception");
-        video.setDirector("Christopher Nolan");
-        video.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video.setYear(2010);
-        video.setDuration("148 min");
-        video.setGenre("Sci-Fi");
-        video.setDescription("A mind-bending thriller about dreams within dreams.");
-        video.setQuantity(5);
-        videoRepository.save(video);
+        testVideo1 = videoRepository.save(new Video(video1));
 
-        customer = new Customer();
-        customer.setUsername("john_doe");
-        customer.setFullName("John Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPassword("password123");
-        customerRepository.save(customer);
+        testCustomer1 = customerRepository.save(new Customer(customer1));
     }
 
     @AfterAll
@@ -77,31 +78,31 @@ public class RentalServiceIntegrationTest {
 
     @Test
     public void testRentAndReturnVideo() {
-        Rental rental = rentalService.rentVideo(customer.getId(), video.getId());
+        Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         assertThat(rental).isNotNull();
-        assertThat(rental.getCustomer().getId()).isEqualTo(customer.getId());
-        assertThat(rental.getVideo().getId()).isEqualTo(video.getId());
+        assertThat(rental.getCustomer().getId()).isEqualTo(testCustomer1.getId());
+        assertThat(rental.getVideo().getId()).isEqualTo(testVideo1.getId());
         assertThat(rental.getStatus()).isEqualTo(RentalStatus.RENTED);
-        assertThat(video.getQuantity()).isEqualTo(4);
+        assertThat(testVideo1.getQuantity()).isEqualTo(4);
 
         Rental returnedRental = rentalService.returnVideo(rental.getId());
         assertThat(returnedRental.getStatus()).isEqualTo(RentalStatus.RETURNED);
-        assertThat(video.getQuantity()).isEqualTo(5);
+        assertThat(testVideo1.getQuantity()).isEqualTo(5);
     }
 
     @Test
     public void testRentVideoWhenOutOfStock() {
-        video.setQuantity(0);
-        videoRepository.save(video);
+        testVideo1.setQuantity(0);
+        videoRepository.save(testVideo1);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> rentalService.rentVideo(customer.getId(), video.getId()));
+                () -> rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId()));
         assertThat(exception.getMessage()).isEqualTo("Video is out of stock");
     }
 
     @Test
     public void testReturnVideoThatIsAlreadyReturned() {
-        Rental rental = rentalService.rentVideo(customer.getId(), video.getId());
+        Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         rentalService.returnVideo(rental.getId());
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
@@ -111,51 +112,51 @@ public class RentalServiceIntegrationTest {
 
     @Test
     public void testGetRentalHistory() {
-        Rental rental = rentalService.rentVideo(customer.getId(), video.getId());
+        Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
-        List<Rental> rentals = rentalService.getRentalHistory(customer.getId());
+        List<Rental> rentals = rentalService.getRentalHistory(testCustomer1.getId());
         assertThat(rentals).hasSize(1);
-        assertThat(rentals.get(0).getVideo().getTitle()).isEqualTo("Inception");
+        assertThat(rentals.get(0).getVideo().getTitle()).isEqualTo(video1Title);
         assertThat(rentals.get(0).getStatus()).isEqualTo(RentalStatus.RENTED);
     }
 
     @Test
-    public void testRentVideoWithNonExistentCustomer() {
+    public void testRentVideoWithNonExistenttestCustomer1() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> rentalService.rentVideo(999L, video.getId()));
+                () -> rentalService.rentVideo(999L, testVideo1.getId()));
         assertThat(exception.getMessage()).isEqualTo("Customer not found");
     }
 
     @Test
     public void testRentVideoWithNonExistentVideo() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> rentalService.rentVideo(customer.getId(), 999L));
+                () -> rentalService.rentVideo(testCustomer1.getId(), 999L));
         assertThat(exception.getMessage()).isEqualTo("Video not found");
     }
 
     @Test
     public void testRentVideoReducesStockCorrectly() {
         for (int i = 0; i < 3; i++) {
-            rentalService.rentVideo(customer.getId(), video.getId());
+            rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         }
 
-        assertThat(video.getQuantity()).isEqualTo(2);
+        assertThat(testVideo1.getQuantity()).isEqualTo(2);
     }
 
     @Test
     public void testReturnVideoUpdatesRentalAndVideo() {
-        Rental rental = rentalService.rentVideo(customer.getId(), video.getId());
+        Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
         Rental returnedRental = rentalService.returnVideo(rental.getId());
 
         assertThat(returnedRental.getStatus()).isEqualTo(RentalStatus.RETURNED);
         assertThat(returnedRental.getReturnDate()).isEqualTo(LocalDate.now());
-        assertThat(video.getQuantity()).isEqualTo(5);
+        assertThat(testVideo1.getQuantity()).isEqualTo(5);
     }
 
     @Test
-    public void testGetRentalHistoryForCustomerWithNoRentals() {
-        List<Rental> rentals = rentalService.getRentalHistory(customer.getId());
+    public void testGetRentalHistoryFortCustomerWithNoRentals() {
+        List<Rental> rentals = rentalService.getRentalHistory(testCustomer1.getId());
         assertThat(rentals).isEmpty();
     }
 }

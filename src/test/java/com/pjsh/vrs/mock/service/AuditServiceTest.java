@@ -12,10 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 class AuditServiceTest {
 
     @InjectMocks
@@ -32,6 +37,11 @@ class AuditServiceTest {
 
     @Mock
     private RatingEvent ratingEvent;
+
+    @Value("${rating1.score}")
+    private Integer rating1Score;
+    @Value("${review1.description}")
+    private String review1Description;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +72,7 @@ class AuditServiceTest {
     void testAuditReview() {
         when(reviewEvent.getCustomerId()).thenReturn(1L);
         when(reviewEvent.getVideoId()).thenReturn(1L);
-        when(reviewEvent.getReview()).thenReturn("Great video!");
+        when(reviewEvent.getReview()).thenReturn(review1Description);
 
         auditService.auditReview(reviewEvent);
 
@@ -75,7 +85,7 @@ class AuditServiceTest {
     void testAuditRating() {
         when(ratingEvent.getCustomerId()).thenReturn(1L);
         when(ratingEvent.getVideoId()).thenReturn(1L);
-        when(ratingEvent.getScore()).thenReturn(4);
+        when(ratingEvent.getScore()).thenReturn(rating1Score);
 
         auditService.auditRating(ratingEvent);
 

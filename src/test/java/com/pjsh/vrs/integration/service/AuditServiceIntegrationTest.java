@@ -19,8 +19,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -29,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class AuditServiceIntegrationTest {
 
     @Autowired
@@ -59,12 +64,24 @@ public class AuditServiceIntegrationTest {
     private RentalRepository rentalRepository;
 
     @Autowired
-    private AuditService auditService; // Assuming AuditService is registered
+    private AuditService auditService;
 
-    private Video video;
-    private Customer customer;
+    @Autowired
+    private Video video1;
+
+    @Autowired
+    private Customer customer1;
+
+    private Video testVideo1;
+
+    private Customer testCustomer1;
 
     private ByteArrayOutputStream outputStreamCaptor;
+
+    @Value("${rating1.score}")
+    private Integer rating1Score;
+    @Value("${review1.description}")
+    private String review1Description;
 
     @BeforeEach
     public void setUp() {
@@ -77,23 +94,9 @@ public class AuditServiceIntegrationTest {
         outputStreamCaptor = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputStreamCaptor));
 
-        video = new Video();
-        video.setTitle("Inception");
-        video.setDirector("Christopher Nolan");
-        video.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video.setYear(2010);
-        video.setDuration("148 min");
-        video.setGenre("Sci-Fi");
-        video.setDescription("A mind-bending thriller about dreams within dreams.");
-        video.setQuantity(5);
-        videoRepository.save(video);
+        testVideo1 = videoRepository.save(new Video(video1));
 
-        customer = new Customer();
-        customer.setUsername("john_doe");
-        customer.setFullName("John Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPassword("password123");
-        customerRepository.save(customer);
+        testCustomer1 = customerRepository.save(new Customer(customer1));
     }
 
     @AfterAll
@@ -110,43 +113,35 @@ public class AuditServiceIntegrationTest {
     public void testCreateRatingAudits() throws InterruptedException {
         System.setOut(new PrintStream(outputStreamCaptor));
 
-        Rating rating = new Rating();
-        rating.setCustomer(customer);
-        rating.setVideo(video);
-        rating.setScore(5);
-
+        Rating rating = new Rating(testVideo1, testCustomer1, rating1Score);
         ratingService.addRating(rating);
 
         String capturedOutput = outputStreamCaptor.toString();
-        assertTrue(capturedOutput.contains("Rating Event: Customer " + customer.getId() + " rated video " + video.getId() + " - Rating: " + rating.getScore()));
+        assertTrue(capturedOutput.contains("Rating Event: Customer " + testCustomer1.getId() + " rated video " + testVideo1.getId() + " - Rating: " + rating1Score));
     }
 
     @Test
     public void testCreateReviewAudits() throws InterruptedException {
         System.setOut(new PrintStream(outputStreamCaptor));
 
-        Review review = new Review();
-        review.setCustomer(customer);
-        review.setVideo(video);
-        review.setDescription("Excellent movie!");
-
+        Review review = new Review(testVideo1, testCustomer1, review1Description);
         reviewService.addReview(review);
 
         String capturedOutput = outputStreamCaptor.toString();
-        assertTrue(capturedOutput.contains("Review Event: Customer " + customer.getId() + " reviewed video " + video.getId() + " - Review: " + review.getDescription()));
+        assertTrue(capturedOutput.contains("Review Event: Customer " + testCustomer1.getId() + " reviewed video " + testVideo1.getId() + " - Review: " + review1Description));
     }
 
     @Test
     public void testRentVideoAudits() throws InterruptedException {
-        rentalService.rentVideo(customer.getId(), video.getId());
+        rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
         String capturedOutput = outputStreamCaptor.toString();
-        assertTrue(capturedOutput.contains("Rental Event: Customer " + customer.getId() + " rented video + " + video.getId() + " - Event Type: RENT"));
+        assertTrue(capturedOutput.contains("Rental Event: Customer " + testCustomer1.getId() + " rented video + " + testVideo1.getId() + " - Event Type: RENT"));
     }
 
     @Test
     public void testReturnVideoAudits() throws InterruptedException {
-        Rental rental = rentalService.rentVideo(customer.getId(), video.getId());
+        Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
         rentalService.returnVideo(rental.getId());
 

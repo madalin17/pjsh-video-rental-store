@@ -21,7 +21,6 @@ public class RecommendationService {
 
     @Async
     public CompletableFuture<List<Video>> getRecommendationsForCustomer(Long customerId) {
-        // First, check the cache for recommendations
         List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customerId);
         if (cachedRecommendations != null) {
             return CompletableFuture.completedFuture(cachedRecommendations);

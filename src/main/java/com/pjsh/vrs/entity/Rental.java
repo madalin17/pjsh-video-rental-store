@@ -1,5 +1,6 @@
 package com.pjsh.vrs.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -7,6 +8,8 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "rentals")
 public class Rental {
+
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

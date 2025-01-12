@@ -18,12 +18,6 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
     List<Rating> findByCustomerId(Long customerId);
 
-    @Query("SELECT r FROM Rating r WHERE r.customer.id = :customerId")
-    List<Review> findAllByCustomerId(@Param("customerId") Long customerId);
-
-    @Query("SELECT r FROM Rating r WHERE r.video.id = :videoId")
-    List<Review> findAllByVideoId(@Param("videoId") Long videoId);
-
     @Transactional
     @Modifying
     @Query("DELETE FROM Rating r WHERE r.video.id = :videoId")

@@ -18,16 +18,24 @@ public class RentalController {
 
     // Rent a video
     @PostMapping("/rent")
-    public ResponseEntity<Rental> rentVideo(@RequestParam Long customerId, @RequestParam Long videoId) {
-        Rental rental = rentalService.rentVideo(customerId, videoId);
-        return new ResponseEntity<>(rental, HttpStatus.CREATED);
+    public ResponseEntity<?> rentVideo(@RequestParam Long customerId, @RequestParam Long videoId) {
+        try {
+            Rental rental = rentalService.rentVideo(customerId, videoId);
+            return new ResponseEntity<>(rental, HttpStatus.CREATED);
+        } catch (IllegalStateException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     // Return a video
     @PostMapping("/return/{rentalId}")
-    public ResponseEntity<Rental> returnVideo(@PathVariable Long rentalId) {
-        Rental rental = rentalService.returnVideo(rentalId);
-        return new ResponseEntity<>(rental, HttpStatus.OK);
+    public ResponseEntity<?> returnVideo(@PathVariable Long rentalId) {
+        try {
+            Rental rental = rentalService.returnVideo(rentalId);
+            return new ResponseEntity<>(rental, HttpStatus.OK);
+        } catch (IllegalStateException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     // View rental history for a customer

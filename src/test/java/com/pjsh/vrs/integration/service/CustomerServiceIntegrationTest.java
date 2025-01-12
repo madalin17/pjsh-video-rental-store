@@ -8,7 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 
@@ -16,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class CustomerServiceIntegrationTest {
 
     @Autowired
@@ -24,15 +29,24 @@ public class CustomerServiceIntegrationTest {
     @Autowired
     private CustomerRepository customerRepository;
 
-    private Customer customer;
+    @Autowired
+    private Customer customer1, customer2;
+
+    private Customer testCustomer1, testCustomer2;
+
+    @Value("${customer1.username}")
+    private String customer1Username;
+    @Value("${customer1.email}")
+    private String customer1Email;
+    @Value("${customer2.fullName}")
+    private String customer2FullName;
 
     @BeforeEach
     public void setUp() {
-        customer = new Customer();
-        customer.setUsername("john_doe");
-        customer.setFullName("John Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPassword("password123");
+        customerRepository.deleteAll();
+
+        testCustomer1 = customerRepository.save(new Customer(customer1));
+        testCustomer2 = customerRepository.save(new Customer(customer2));
     }
 
     @AfterAll
@@ -42,77 +56,55 @@ public class CustomerServiceIntegrationTest {
 
     @Test
     public void testCreateCustomer() {
-        Customer savedCustomer = customerService.registerCustomer(customer);
+        assertThat(testCustomer1).isNotNull();
+        assertThat(testCustomer1.getId()).isNotNull();
+        assertThat(testCustomer1.getUsername()).isEqualTo(customer1Username);
 
-        assertThat(savedCustomer).isNotNull();
-        assertThat(savedCustomer.getId()).isNotNull();
-        assertThat(savedCustomer.getUsername()).isEqualTo("john_doe");
-
-        customerRepository.delete(savedCustomer);
+        customerRepository.delete(testCustomer1);
     }
 
     @Test
     public void testGetCustomerById() {
-        Customer savedCustomer = customerRepository.save(customer);
-
-        Optional<Customer> fetchedCustomer = customerService.getCustomerById(savedCustomer.getId());
+        Optional<Customer> fetchedCustomer = customerService.getCustomerById(testCustomer1.getId());
 
         assertThat(fetchedCustomer).isPresent();
-        assertThat(fetchedCustomer.get().getUsername()).isEqualTo("john_doe");
-
-        customerRepository.delete(savedCustomer);
+        assertThat(fetchedCustomer.get().getUsername()).isEqualTo(customer1Username);
     }
 
     @Test
     public void testGetCustomerByEmail() {
-        customerRepository.save(customer);
-
-        Customer fetchedCustomer = customerService.getCustomerByEmail("john.doe@example.com");
+        Customer fetchedCustomer = customerService.getCustomerByEmail(customer1Email);
 
         assertThat(fetchedCustomer).isNotNull();
-        assertThat(fetchedCustomer.getEmail()).isEqualTo("john.doe@example.com");
+        assertThat(fetchedCustomer.getEmail()).isEqualTo(customer1Email);
 
         customerRepository.delete(fetchedCustomer);
     }
 
     @Test
     public void testUpdateCustomer() {
-        Customer savedCustomer = customerRepository.save(customer);
-        savedCustomer.setFullName("Johnathan Doe");
+        testCustomer1.setFullName(customer2FullName);
 
-        Customer updatedCustomer = customerService.registerCustomer(savedCustomer);
+        Customer updatedCustomer = customerService.registerCustomer(testCustomer1);
 
-        assertThat(updatedCustomer.getFullName()).isEqualTo("Johnathan Doe");
+        assertThat(updatedCustomer.getFullName()).isEqualTo(customer2FullName);
 
         customerRepository.delete(updatedCustomer);
     }
 
     @Test
     public void testDeleteCustomer() {
-        Customer savedCustomer = customerRepository.save(customer);
+        customerService.deleteCustomer(testCustomer1.getId());
 
-        customerService.deleteCustomer(savedCustomer.getId());
-
-        Optional<Customer> deletedCustomer = customerRepository.findById(savedCustomer.getId());
+        Optional<Customer> deletedCustomer = customerRepository.findById(testCustomer1.getId());
         assertThat(deletedCustomer).isEmpty();
     }
 
     @Test
     public void testGetAllCustomers() {
-        customerRepository.save(customer);
-        Customer anotherCustomer = new Customer();
-        anotherCustomer.setUsername("jane_doe");
-        anotherCustomer.setFullName("Jane Doe");
-        anotherCustomer.setEmail("jane.doe@example.com");
-        anotherCustomer.setPassword("password123");
-        customerRepository.save(anotherCustomer);
-
         Iterable<Customer> customers = customerService.getAllCustomers();
 
         assertThat(customers).hasSize(2);
-
-        customerRepository.delete(customer);
-        customerRepository.delete(anotherCustomer);
     }
 }
 

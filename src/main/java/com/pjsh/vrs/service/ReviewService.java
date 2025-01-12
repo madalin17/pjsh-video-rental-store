@@ -26,19 +26,19 @@ public class ReviewService {
         reviewRepository.deleteById(id);
     }
 
-    public List<Review> getReviewsByVideoId(Long videoId) {
+    public List<Review> findByVideoId(Long videoId) {
         return reviewRepository.findByVideoId(videoId);
     }
 
-    public List<Review> getReviewsByCustomerId(Long customerId) {
+    public List<Review> findByCustomerId(Long customerId) {
         return reviewRepository.findByCustomerId(customerId);
     }
 
-    public void deleteAllReviewsByVideoId(Long videoId) {
+    public void deleteAllByVideoId(Long videoId) {
         reviewRepository.deleteAllByVideoId(videoId);
     }
 
-    public void deleteAllReviewsByCustomerId(Long customerId) {
+    public void deleteAllByCustomerId(Long customerId) {
         reviewRepository.deleteAllByCustomerId(customerId);
     }
 }

@@ -11,7 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 
@@ -19,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class ReviewRepositoryIntegrationTest {
 
     @Autowired
@@ -30,8 +35,28 @@ public class ReviewRepositoryIntegrationTest {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
     private Video video1, video2;
+
+    @Autowired
     private Customer customer1, customer2;
+
+    private Video testVideo1, testVideo2;
+
+    private Customer testCustomer1, testCustomer2;
+
+    private Review testReview1, testReview2, testReview3;
+
+    @Value("${review1.description}")
+    private String review1Description;
+    @Value("${review2.description}")
+    private String review2Description;
+    @Value("${review3.description}")
+    private String review3Description;
+    @Value("${video1.title}")
+    private String video1Title;
+    @Value("${customer2.fullName}")
+    private String customer2FullName;
 
     @BeforeEach
     void setUp() {
@@ -39,59 +64,15 @@ public class ReviewRepositoryIntegrationTest {
         videoRepository.deleteAll();
         customerRepository.deleteAll();
 
-        video1 = new Video();
-        video1.setTitle("Inception");
-        video1.setDirector("Christopher Nolan");
-        video1.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video1.setYear(2010);
-        video1.setDuration("148 min");
-        video1.setGenre("Sci-Fi");
-        video1.setDescription("A mind-bending thriller about dreams within dreams.");
-        video1.setQuantity(5);
-        videoRepository.save(video1);
+        testVideo1 = videoRepository.save(new Video(video1));
+        testVideo2 = videoRepository.save(new Video(video2));
 
-        video2 = new Video();
-        video2.setTitle("Titanic");
-        video2.setDirector("James Cameron");
-        video2.setActors("Leonardo DiCaprio, Kate Winslet");
-        video2.setYear(1997);
-        video2.setDuration("195 min");
-        video2.setGenre("Romance");
-        video2.setDescription("A tragic love story set against the backdrop of the Titanic.");
-        video2.setQuantity(3);
-        videoRepository.save(video2);
+        testCustomer1 = customerRepository.save(new Customer(customer1));
+        testCustomer2 = customerRepository.save(new Customer(customer2));
 
-        customer1 = new Customer();
-        customer1.setUsername("john_doe");
-        customer1.setFullName("John Doe");
-        customer1.setEmail("john.doe@example.com");
-        customer1.setPassword("password123");
-        customerRepository.save(customer1);
-
-        customer2 = new Customer();
-        customer2.setUsername("jane_doe");
-        customer2.setFullName("Jane Doe");
-        customer2.setEmail("jane.doe@example.com");
-        customer2.setPassword("password456");
-        customerRepository.save(customer2);
-
-        Review review1 = new Review();
-        review1.setCustomer(customer1);
-        review1.setVideo(video1);
-        review1.setDescription("Great movie!");
-        reviewRepository.save(review1);
-
-        Review review2 = new Review();
-        review2.setCustomer(customer2);
-        review2.setVideo(video2);
-        review2.setDescription("Mind-blowing visuals.");
-        reviewRepository.save(review2);
-
-        Review review3 = new Review();
-        review3.setCustomer(customer1);
-        review3.setVideo(video2);
-        review3.setDescription("Damn.");
-        reviewRepository.save(review3);
+        testReview1 = reviewRepository.save(new Review(testVideo1, testCustomer1, review1Description));
+        testReview2 = reviewRepository.save(new Review(testVideo1, testCustomer2, review2Description));
+        testReview3 = reviewRepository.save(new Review(testVideo2, testCustomer1, review3Description));
     }
 
     @AfterAll
@@ -103,43 +84,30 @@ public class ReviewRepositoryIntegrationTest {
 
     @Test
     void testFindByVideoId() {
-        List<Review> reviews = reviewRepository.findByVideoId(video1.getId());
-        assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getDescription()).isEqualTo("Great movie!");
+        List<Review> reviews = reviewRepository.findByVideoId(testVideo1.getId());
+        assertThat(reviews).hasSize(2);
+        assertThat(reviews.get(0).getDescription()).isEqualTo(review1Description);
+        assertThat(reviews.get(1).getDescription()).isEqualTo(review2Description);
     }
 
     @Test
     void testFindByCustomerId() {
-        List<Review> reviews = reviewRepository.findByCustomerId(customer2.getId());
+        List<Review> reviews = reviewRepository.findByCustomerId(testCustomer2.getId());
         assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getCustomer().getFullName()).isEqualTo("Jane Doe");
-    }
-
-    @Test
-    void testFindAllByVideoId() {
-        List<Review> reviews = reviewRepository.findAllByVideoId(video1.getId());
-        assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getVideo().getTitle()).isEqualTo("Inception");
-    }
-
-    @Test
-    void testFindAllByCustomerId() {
-        List<Review> reviews = reviewRepository.findAllByCustomerId(customer2.getId());
-        assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getDescription()).isEqualTo("Mind-blowing visuals.");
+        assertThat(reviews.get(0).getCustomer().getFullName()).isEqualTo(customer2FullName);
     }
 
     @Test
     void testDeleteAllByVideoId() {
-        reviewRepository.deleteAllByVideoId(video1.getId());
-        List<Review> reviews = reviewRepository.findByVideoId(video1.getId());
+        reviewRepository.deleteAllByVideoId(testVideo1.getId());
+        List<Review> reviews = reviewRepository.findByVideoId(testVideo1.getId());
         assertThat(reviews).isEmpty();
     }
 
     @Test
     void testDeleteAllByCustomerId() {
-        reviewRepository.deleteAllByCustomerId(customer1.getId());
-        List<Review> reviews = reviewRepository.findByCustomerId(customer1.getId());
+        reviewRepository.deleteAllByCustomerId(testCustomer1.getId());
+        List<Review> reviews = reviewRepository.findByCustomerId(testCustomer1.getId());
         assertThat(reviews).isEmpty();
     }
 }

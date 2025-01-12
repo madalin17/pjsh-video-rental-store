@@ -41,7 +41,7 @@ public class RatingServiceTest {
     public void testGetRatingsByVideoId() {
         when(ratingRepository.findByVideoId(1L)).thenReturn(List.of(rating));
 
-        List<Rating> ratings = ratingService.getRatingsByVideoId(1L);
+        List<Rating> ratings = ratingService.findByVideoId(1L);
 
         assertThat(ratings).isNotEmpty();
         assertThat(ratings.get(0).getScore()).isEqualTo(5);
@@ -51,7 +51,7 @@ public class RatingServiceTest {
     public void testGetRatingsByCustomerId() {
         when(ratingRepository.findByCustomerId(1L)).thenReturn(List.of(rating));
 
-        List<Rating> ratings = ratingService.getRatingsByCustomerId(1L);
+        List<Rating> ratings = ratingService.findByCustomerId(1L);
 
         assertThat(ratings).isNotEmpty();
         assertThat(ratings.get(0).getScore()).isEqualTo(5);

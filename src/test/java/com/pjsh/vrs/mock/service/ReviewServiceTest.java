@@ -38,7 +38,7 @@ public class ReviewServiceTest {
     public void testGetReviewsByVideoId() {
         when(reviewRepository.findByVideoId(1L)).thenReturn(List.of(review));
 
-        List<Review> reviews = reviewService.getReviewsByVideoId(1L);
+        List<Review> reviews = reviewService.findByVideoId(1L);
 
         assertThat(reviews).isNotEmpty();
         assertThat(reviews.get(0).getDescription()).isEqualTo("Great video!");
@@ -48,7 +48,7 @@ public class ReviewServiceTest {
     public void testGetReviewsByCustomerId() {
         when(reviewRepository.findByCustomerId(1L)).thenReturn(List.of(review));
 
-        List<Review> reviews = reviewService.getReviewsByCustomerId(1L);
+        List<Review> reviews = reviewService.findByCustomerId(1L);
 
         assertThat(reviews).isNotEmpty();
         assertThat(reviews.get(0).getDescription()).isEqualTo("Great video!");

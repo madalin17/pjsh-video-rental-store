@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.pjsh.vrs"/>
+    <context:property-placeholder location="classpath:test.properties"/>
+
+    <bean id="video1" class="com.pjsh.vrs.entity.Video">
+        <property name="title" value="${video1.title}"/>
+        <property name="director" value="${video1.director}"/>
+        <property name="actors" value="${video1.actors}"/>
+        <property name="year" value="${video1.year}"/>
+        <property name="duration" value="${video1.duration}"/>
+        <property name="genre" value="${video1.genre}"/>
+        <property name="description" value="${video1.description}"/>
+        <property name="quantity" value="${video1.quantity}"/>
+    </bean>
+
+    <bean id="video2" class="com.pjsh.vrs.entity.Video">
+        <property name="title" value="${video2.title}"/>
+        <property name="director" value="${video2.director}"/>
+        <property name="actors" value="${video2.actors}"/>
+        <property name="year" value="${video2.year}"/>
+        <property name="duration" value="${video2.duration}"/>
+        <property name="genre" value="${video2.genre}"/>
+        <property name="description" value="${video2.description}"/>
+        <property name="quantity" value="${video2.quantity}"/>
+    </bean>
+
+    <bean id="video3" class="com.pjsh.vrs.entity.Video">
+        <property name="title" value="${video3.title}"/>
+        <property name="director" value="${video3.director}"/>
+        <property name="actors" value="${video3.actors}"/>
+        <property name="year" value="${video3.year}"/>
+        <property name="duration" value="${video3.duration}"/>
+        <property name="genre" value="${video3.genre}"/>
+        <property name="description" value="${video3.description}"/>
+        <property name="quantity" value="${video3.quantity}"/>
+    </bean>
+
+    <bean id="video4" class="com.pjsh.vrs.entity.Video">
+        <property name="title" value="${video4.title}"/>
+        <property name="director" value="${video4.director}"/>
+        <property name="actors" value="${video4.actors}"/>
+        <property name="year" value="${video4.year}"/>
+        <property name="duration" value="${video4.duration}"/>
+        <property name="genre" value="${video4.genre}"/>
+        <property name="description" value="${video4.description}"/>
+        <property name="quantity" value="${video4.quantity}"/>
+    </bean>
+
+    <bean id="video5" class="com.pjsh.vrs.entity.Video">
+        <property name="title" value="${video5.title}"/>
+        <property name="director" value="${video5.director}"/>
+        <property name="actors" value="${video5.actors}"/>
+        <property name="year" value="${video5.year}"/>
+        <property name="duration" value="${video5.duration}"/>
+        <property name="genre" value="${video5.genre}"/>
+        <property name="description" value="${video5.description}"/>
+        <property name="quantity" value="${video5.quantity}"/>
+    </bean>
+
+    <bean id="customer1" class="com.pjsh.vrs.entity.Customer">
+        <property name="username" value="${customer1.username}"/>
+        <property name="fullName" value="${customer1.fullName}"/>
+        <property name="email" value="${customer1.email}"/>
+        <property name="password" value="${customer1.password}"/>
+    </bean>
+
+    <bean id="customer2" class="com.pjsh.vrs.entity.Customer">
+        <property name="username" value="${customer2.username}"/>
+        <property name="fullName" value="${customer2.fullName}"/>
+        <property name="email" value="${customer2.email}"/>
+        <property name="password" value="${customer2.password}"/>
+    </bean>
+
+    <bean id="customer3" class="com.pjsh.vrs.entity.Customer">
+        <property name="username" value="${customer3.username}"/>
+        <property name="fullName" value="${customer3.fullName}"/>
+        <property name="email" value="${customer3.email}"/>
+        <property name="password" value="${customer3.password}"/>
+    </bean>
+
+    <bean id="review1" class="com.pjsh.vrs.entity.Review">
+        <property name="customer" ref="customer1"/>
+        <property name="video" ref="video1"/>
+        <property name="description" value="Amazing movie!"/>
+    </bean>
+
+    <bean id="review2" class="com.pjsh.vrs.entity.Review">
+        <property name="customer" ref="customer1"/>
+        <property name="video" ref="video2"/>
+        <property name="description" value="Not bad, but could be better."/>
+    </bean>
+
+    <bean id="review3" class="com.pjsh.vrs.entity.Review">
+        <property name="customer" ref="customer2"/>
+        <property name="video" ref="video1"/>
+        <property name="description" value="A masterpiece!"/>
+    </bean>
+
+    <bean id="rating1" class="com.pjsh.vrs.entity.Rating">
+        <property name="score" value="5"/>
+        <property name="customer" ref="customer1"/>
+        <property name="video" ref="video1"/>
+    </bean>
+
+    <bean id="rating2" class="com.pjsh.vrs.entity.Rating">
+        <property name="score" value="3"/>
+        <property name="customer" ref="customer2"/>
+        <property name="video" ref="video1"/>
+    </bean>
+</beans>

@@ -17,12 +17,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByCustomerId(Long customerId);
 
-    @Query("SELECT r FROM Review r WHERE r.customer.id = :customerId")
-    List<Review> findAllByCustomerId(@Param("customerId") Long customerId);
-
-    @Query("SELECT r FROM Review r WHERE r.video.id = :videoId")
-    List<Review> findAllByVideoId(@Param("videoId") Long videoId);
-
     @Transactional
     @Modifying
     @Query("DELETE FROM Review r WHERE r.video.id = :videoId")

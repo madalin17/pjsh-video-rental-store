@@ -14,16 +14,6 @@ public class RatingController {
     @Autowired
     private RatingService ratingService;
 
-    @GetMapping("/video/{videoId}")
-    public List<Rating> getRatingsByVideoId(@PathVariable Long videoId) {
-        return ratingService.getRatingsByVideoId(videoId);
-    }
-
-    @GetMapping("/customer/{customerId}")
-    public List<Rating> getRatingsByCustomerId(@PathVariable Long customerId) {
-        return ratingService.getRatingsByCustomerId(customerId);
-    }
-
     @PostMapping
     public Rating addRating(@RequestBody Rating rating) {
         return ratingService.addRating(rating);
@@ -32,6 +22,31 @@ public class RatingController {
     @DeleteMapping("/{id}")
     public void deleteRating(@PathVariable Long id) {
         ratingService.deleteRating(id);
+    }
+
+    @GetMapping("/video/{videoId}")
+    public List<Rating> findByVideoId(@PathVariable Long videoId) {
+        return ratingService.findByVideoId(videoId);
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public List<Rating> findByCustomerId(@PathVariable Long customerId) {
+        return ratingService.findByCustomerId(customerId);
+    }
+
+    @DeleteMapping("/video/all/{videoId}")
+    public void deleteAllByVideoId(@PathVariable Long videoId) {
+        ratingService.deleteAllByVideoId(videoId);
+    }
+
+    @DeleteMapping("/customer/all/{customerId}")
+    public void deleteAllByCustomerId(@PathVariable Long customerId) {
+        ratingService.deleteAllByCustomerId(customerId);
+    }
+
+    @GetMapping("/average/{id}")
+    public void getAverageScoreByVideoId(@PathVariable Long id) {
+        ratingService.getAverageScoreByVideoId(id);
     }
 }
 

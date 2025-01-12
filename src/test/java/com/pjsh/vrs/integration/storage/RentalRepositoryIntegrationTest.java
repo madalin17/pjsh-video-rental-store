@@ -12,7 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 
@@ -20,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextConfiguration(locations = "classpath:test-context.xml")
 public class RentalRepositoryIntegrationTest {
 
     @Autowired
@@ -31,9 +35,17 @@ public class RentalRepositoryIntegrationTest {
     @Autowired
     private CustomerRepository customerRepository;
 
-    private Customer customer1, customer2;
+    @Autowired
     private Video video1, video2;
-    private Rental rental1, rental2, rental3;
+
+    @Autowired
+    private Customer customer1, customer2;
+
+    private Video testVideo1, testVideo2;
+
+    private Customer testCustomer1, testCustomer2;
+
+    private Rental testRental1, testRetal2, testRental3;
 
     @BeforeEach
     public void setUp() {
@@ -41,59 +53,29 @@ public class RentalRepositoryIntegrationTest {
         videoRepository.deleteAll();
         customerRepository.deleteAll();
 
-        video1 = new Video();
-        video1.setTitle("Inception");
-        video1.setDirector("Christopher Nolan");
-        video1.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video1.setYear(2010);
-        video1.setDuration("148 min");
-        video1.setGenre("Sci-Fi");
-        video1.setDescription("A mind-bending thriller about dreams within dreams.");
-        video1.setQuantity(5);
-        videoRepository.save(video1);
+        testVideo1 = videoRepository.save(new Video(video1));
+        testVideo2 = videoRepository.save(new Video(video2));
 
-        video2 = new Video();
-        video2.setTitle("Titanic");
-        video2.setDirector("James Cameron");
-        video2.setActors("Leonardo DiCaprio, Kate Winslet");
-        video2.setYear(1997);
-        video2.setDuration("195 min");
-        video2.setGenre("Romance");
-        video2.setDescription("A tragic love story set against the backdrop of the Titanic.");
-        video2.setQuantity(3);
-        videoRepository.save(video2);
+        testCustomer1 = customerRepository.save(new Customer(customer1));
+        testCustomer2 = customerRepository.save(new Customer(customer2));
 
-        customer1 = new Customer();
-        customer1.setUsername("john_doe");
-        customer1.setFullName("John Doe");
-        customer1.setEmail("john.doe@example.com");
-        customer1.setPassword("password123");
-        customerRepository.save(customer1);
+        testRental1 = new Rental();
+        testRental1.setCustomer(testCustomer1);
+        testRental1.setVideo(testVideo1);
+        testRental1.setStatus(RentalStatus.RENTED);
+        rentalRepository.save(testRental1);
 
-        customer2 = new Customer();
-        customer2.setUsername("jane_doe");
-        customer2.setFullName("Jane Doe");
-        customer2.setEmail("jane.doe@example.com");
-        customer2.setPassword("password456");
-        customerRepository.save(customer2);
+        testRetal2 = new Rental();
+        testRetal2.setCustomer(testCustomer1);
+        testRetal2.setVideo(testVideo2);
+        testRetal2.setStatus(RentalStatus.RETURNED);
+        rentalRepository.save(testRetal2);
 
-        rental1 = new Rental();
-        rental1.setCustomer(customer1);
-        rental1.setVideo(video1);
-        rental1.setStatus(RentalStatus.RENTED);
-        rentalRepository.save(rental1);
-
-        rental2 = new Rental();
-        rental2.setCustomer(customer1);
-        rental2.setVideo(video2);
-        rental2.setStatus(RentalStatus.RETURNED);
-        rentalRepository.save(rental2);
-
-        rental3 = new Rental();
-        rental3.setCustomer(customer2);
-        rental3.setVideo(video1);
-        rental3.setStatus(RentalStatus.RENTED);
-        rentalRepository.save(rental3);
+        testRental3 = new Rental();
+        testRental3.setCustomer(testCustomer2);
+        testRental3.setVideo(testVideo1);
+        testRental3.setStatus(RentalStatus.RENTED);
+        rentalRepository.save(testRental3);
     }
 
     @AfterAll
@@ -105,22 +87,22 @@ public class RentalRepositoryIntegrationTest {
 
     @Test
     public void testFindByCustomer() {
-        List<Rental> rentals = rentalRepository.findByCustomer(customer1);
+        List<Rental> rentals = rentalRepository.findByCustomer(testCustomer1);
 
         assertNotNull(rentals);
         assertEquals(2, rentals.size());
-        assertTrue(rentals.stream().anyMatch(r -> r.getVideo().equals(video1)));
-        assertTrue(rentals.stream().anyMatch(r -> r.getVideo().equals(video2)));
+        assertTrue(rentals.stream().anyMatch(r -> r.getVideo().equals(testVideo1)));
+        assertTrue(rentals.stream().anyMatch(r -> r.getVideo().equals(testVideo1)));
     }
 
     @Test
     public void testFindByVideo() {
-        List<Rental> rentals = rentalRepository.findByVideo(video1);
+        List<Rental> rentals = rentalRepository.findByVideo(testVideo1);
 
         assertNotNull(rentals);
         assertEquals(2, rentals.size());
-        assertTrue(rentals.stream().anyMatch(r -> r.getCustomer().equals(customer1)));
-        assertTrue(rentals.stream().anyMatch(r -> r.getCustomer().equals(customer2)));
+        assertTrue(rentals.stream().anyMatch(r -> r.getCustomer().equals(testCustomer1)));
+        assertTrue(rentals.stream().anyMatch(r -> r.getCustomer().equals(testCustomer2)));
     }
 
     @Test
@@ -129,14 +111,14 @@ public class RentalRepositoryIntegrationTest {
 
         assertNotNull(rented);
         assertEquals(2, rented.size());
-        assertTrue(rented.stream().anyMatch(r -> r.getVideo().equals(video1)));
-        assertTrue(rented.stream().anyMatch(r -> r.getCustomer().equals(customer2)));
+        assertTrue(rented.stream().anyMatch(r -> r.getVideo().equals(testVideo1)));
+        assertTrue(rented.stream().anyMatch(r -> r.getCustomer().equals(testCustomer2)));
 
         List<Rental> returned = rentalRepository.findByStatus(RentalStatus.RETURNED);
 
         assertNotNull(returned);
         assertEquals(1, returned.size());
-        assertEquals(video2, returned.get(0).getVideo());
-        assertEquals(customer1, returned.get(0).getCustomer());
+        assertEquals(testVideo2, returned.get(0).getVideo());
+        assertEquals(testCustomer1, returned.get(0).getCustomer());
     }
 }
