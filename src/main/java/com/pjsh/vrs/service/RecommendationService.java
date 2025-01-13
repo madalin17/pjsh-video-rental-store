@@ -61,7 +61,6 @@ public class RecommendationService {
         List<String> actors2 = Arrays.asList(v2.getActors().split(","));
         if (!Collections.disjoint(actors1, actors2)) score += 2;
 
-        System.out.println(score);
         return score >= 3;
     }
 }
