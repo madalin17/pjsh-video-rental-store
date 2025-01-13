@@ -44,6 +44,7 @@ public class RatingControllerTest {
     private RatingController ratingController;
 
     private MockMvc mockMvc;
+
     @Autowired
     private ObjectMapper objectMapper;
 

@@ -9,7 +9,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -22,6 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class RecommendationControllerTest {
 
     @Mock
@@ -32,42 +41,38 @@ public class RecommendationControllerTest {
 
     private MockMvc mockMvc;
 
-    private Video video;
+    @Autowired
+    private Video video1, video2;
 
-    private List<Video> recommendedVideos;
+    private Long customer1Id;
+
+    @Value("${video1.title}")
+    private String video1Title;
+    @Value("${video2.title}")
+    private String video2Title;
 
     @BeforeEach
     public void setUp() {
-        video = new Video();
-        video.setTitle("Inception");
-        video.setDirector("Christopher Nolan");
-        video.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video.setYear(2010);
-        video.setDuration("148 min");
-        video.setGenre("Sci-Fi");
-        video.setDescription("A mind-bending thriller about dreams within dreams.");
-        video.setQuantity(5);
-
-        recommendedVideos = List.of(video);
-
         mockMvc = MockMvcBuilders.standaloneSetup(recommendationController).build();
+
+        customer1Id = 1L;
     }
 
     @Test
-    public void testGetRecommendations_Success() throws Exception {
-        when(recommendationService.getRecommendationsForCustomer(1L)).thenReturn(CompletableFuture.completedFuture(recommendedVideos));
+    public void testGetRecommendationsSuccess() throws Exception {
+        when(recommendationService.getRecommendationsForCustomer(customer1Id)).thenReturn(CompletableFuture.completedFuture(List.of(video1, video2)));
 
-        mockMvc.perform(get("/recommendations/{customerId}", 1L))
+        mockMvc.perform(get("/recommendations/{customerId}", customer1Id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Inception"))
-                .andExpect(jsonPath("$[0].director").value("Christopher Nolan"));
+                .andExpect(jsonPath("$[0].title").value(video1Title))
+                .andExpect(jsonPath("$[1].title").value(video2Title));
     }
 
     @Test
-    public void testGetRecommendations_NoContent() throws Exception {
-        when(recommendationService.getRecommendationsForCustomer(1L)).thenReturn(CompletableFuture.completedFuture(List.of()));
+    public void testGetRecommendationsNoContent() throws Exception {
+        when(recommendationService.getRecommendationsForCustomer(customer1Id)).thenReturn(CompletableFuture.completedFuture(List.of()));
 
-        mockMvc.perform(get("/recommendations/{customerId}", 1L))
+        mockMvc.perform(get("/recommendations/{customerId}", customer1Id))
                 .andExpect(status().isNoContent());
     }
 
