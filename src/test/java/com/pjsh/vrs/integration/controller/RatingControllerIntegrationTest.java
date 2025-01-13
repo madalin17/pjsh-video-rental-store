@@ -156,6 +156,7 @@ public class RatingControllerIntegrationTest {
     public void testGetAverageScoreByVideoId() throws Exception {
         mockMvc.perform(get("/ratings/average/{id}", testVideo1.getId()))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string(String.valueOf((double) (rating1Score + rating2Score) / 2)));
     }
 }
