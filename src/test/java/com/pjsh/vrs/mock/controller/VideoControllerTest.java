@@ -1,5 +1,6 @@
 package com.pjsh.vrs.mock.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pjsh.vrs.controller.VideoController;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.VideoService;
@@ -11,7 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -25,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class VideoControllerTest {
 
     @Mock
@@ -35,31 +42,23 @@ public class VideoControllerTest {
 
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
     private Video video1, video2;
+
+    private Long video1Id, video2Id;
+
+    @Value("${video1.title}")
+    private String video1Title;
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(videoController).build();
 
-        video1 = new Video();
-        video1.setTitle("Inception");
-        video1.setDirector("Christopher Nolan");
-        video1.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video1.setYear(2010);
-        video1.setDuration("148 min");
-        video1.setGenre("Sci-Fi");
-        video1.setDescription("A mind-bending thriller about dreams within dreams.");
-        video1.setQuantity(5);
-
-        video2 = new Video();
-        video2.setTitle("Titanic");
-        video2.setDirector("James Cameron");
-        video2.setActors("Leonardo DiCaprio, Kate Winslet");
-        video2.setYear(1997);
-        video2.setDuration("195 min");
-        video2.setGenre("Romance");
-        video2.setDescription("A tragic love story set against the backdrop of the Titanic.");
-        video2.setQuantity(3);
+        video1Id = 1L;
+        video2Id = 2L;
     }
 
     @Test
@@ -78,35 +77,36 @@ public class VideoControllerTest {
 
         mockMvc.perform(get("/videos/{id}", 1L))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Inception"));
+                .andExpect(jsonPath("$.title").value(video1Title));
     }
 
     @Test
     public void testSearchVideosByTitle() throws Exception {
-        List<Video> videoList = Arrays.asList(video1);
-        when(videoService.searchVideosByTitle("inception")).thenReturn(videoList);
+        when(videoService.searchVideosByTitle(video1Title)).thenReturn(Arrays.asList(video1));
 
-        mockMvc.perform(get("/videos/search?title=inception"))
+        mockMvc.perform(get("/videos/search?title=" + video1Title))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test
     public void testAddVideo() throws Exception {
-        when(videoService.addVideo(video1)).thenReturn(video1);
+        when(videoService.addVideo(any(Video.class))).thenReturn(video1);
 
         mockMvc.perform(post("/videos")
                         .contentType("application/json")
-                        .content("{ \"title\": \"Inception\", \"genre\": \"Sci-Fi\" }"))
-                .andExpect(status().isOk());
+                        .content(objectMapper.writeValueAsString(video1)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Inception"));
     }
 
     @Test
     public void testDeleteVideo() throws Exception {
         doNothing().when(videoService).deleteVideo(1L);
 
-        mockMvc.perform(delete("/videos/{id}", 1L))
+        mockMvc.perform(delete("/videos/{id}", video1Id))
                 .andExpect(status().isOk());
+
+        verify(videoService, times(1)).deleteVideo(video1Id);
     }
 }
-

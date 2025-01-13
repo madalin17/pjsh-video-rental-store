@@ -40,10 +40,12 @@ public class Video {
     @Column(nullable = false)
     private Integer quantity;
 
+    @JsonIgnore
     @JsonManagedReference
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    @JsonIgnore
     @JsonManagedReference
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rating> ratings = new ArrayList<>();

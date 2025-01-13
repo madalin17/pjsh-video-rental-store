@@ -15,11 +15,13 @@ public class Interaction implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @JsonBackReference
     @JoinColumn(name = "video_id", nullable = false)
     @ManyToOne(optional = false)
     private Video video;
 
+    @JsonIgnore
     @JsonBackReference
     @JoinColumn(name = "customer_id", nullable = false)
     @ManyToOne(optional = false)

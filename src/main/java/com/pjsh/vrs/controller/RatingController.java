@@ -45,8 +45,8 @@ public class RatingController {
     }
 
     @GetMapping("/average/{id}")
-    public void getAverageScoreByVideoId(@PathVariable Long id) {
-        ratingService.getAverageScoreByVideoId(id);
+    public Double getAverageScoreByVideoId(@PathVariable Long id) {
+        return ratingService.getAverageScoreByVideoId(id);
     }
 }
 

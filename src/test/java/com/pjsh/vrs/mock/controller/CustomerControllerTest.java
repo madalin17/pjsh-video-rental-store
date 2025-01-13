@@ -1,5 +1,6 @@
 package com.pjsh.vrs.mock.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pjsh.vrs.controller.CustomerController;
 import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.service.CustomerService;
@@ -11,7 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -25,6 +30,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
+
 public class CustomerControllerTest {
 
     @Mock
@@ -35,71 +43,83 @@ public class CustomerControllerTest {
 
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private Customer customer1, customer2;
+
+    private Long customer1Id, customer2Id;
+
+    @Value("${customer1.email}")
+    private String customer1Email;
+    @Value("${customer1.username}")
+    private String customer1Username;
+    @Value("${customer2.email}")
+    private String customer2Email;
+    @Value("${customer2.username}")
+    private String customer2Username;
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(customerController).build();
 
-        customer1 = new Customer();
-        customer1.setId(1L);
-        customer1.setUsername("john_doe");
-        customer1.setFullName("John Doe");
-        customer1.setEmail("john.doe@example.com");
-        customer1.setPassword("password123");
-
-        customer2 = new Customer();
-        customer2.setId(2L);
-        customer2.setUsername("jane_doe");
-        customer2.setFullName("Jane Doe");
-        customer2.setEmail("jane.doe@example.com");
-        customer2.setPassword("password123");
+        customer1Id = 1L;
+        customer2Id = 2L;
     }
 
     @Test
-    public void testGetAllCustomers() throws Exception {
+    public void shouldReturnAllCustomers() throws Exception {
         List<Customer> customerList = Arrays.asList(customer1, customer2);
         when(customerService.getAllCustomers()).thenReturn(customerList);
 
         mockMvc.perform(get("/customers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].email").value(customer1Email))
+                .andExpect(jsonPath("$[1].email").value(customer2Email));
     }
 
     @Test
-    public void testGetCustomerById() throws Exception {
-        when(customerService.getCustomerById(1L)).thenReturn(java.util.Optional.of(customer1));
+    public void shouldReturnCustomerById() throws Exception {
+        when(customerService.getCustomerById(customer1Id)).thenReturn(java.util.Optional.of(customer1));
 
-        mockMvc.perform(get("/customers/{id}", 1L))
+        mockMvc.perform(get("/customers/{id}", customer1Id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("john_doe"));
+                .andExpect(jsonPath("$.email").value(customer1Email))
+                .andExpect(jsonPath("$.username").value(customer1Username));
     }
 
     @Test
-    public void testGetCustomerByEmail() throws Exception {
-        when(customerService.getCustomerByEmail("john.doe@example.com")).thenReturn(customer1);
+    public void shouldReturnCustomerByEmail() throws Exception {
+        when(customerService.getCustomerByEmail(customer1Email)).thenReturn(customer1);
 
-        mockMvc.perform(get("/customers/email")
-                        .param("email", "john.doe@example.com"))
+        mockMvc.perform(get("/customers/email").param("email", customer1Email))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("john_doe"));
+                .andExpect(jsonPath("$.email").value(customer1Email))
+                .andExpect(jsonPath("$.username").value(customer1Username));
     }
 
     @Test
-    public void testRegisterCustomer() throws Exception {
-        when(customerService.registerCustomer(customer1)).thenReturn(customer1);
+    public void shouldRegisterCustomer() throws Exception {
+        when(customerService.registerCustomer(customer2)).thenReturn(customer2);
 
+        System.out.println(objectMapper.writeValueAsString(customer2));
         mockMvc.perform(post("/customers")
                         .contentType("application/json")
-                        .content("{ \"username\": \"john_doe\", \"fullName\": \"John Doe\", \"email\": \"john.doe@example.com\", \"password\": \"password123\" }"))
-                .andExpect(status().isOk());
+                        .content(objectMapper.writeValueAsString(customer2)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(customer2Email))
+                .andExpect(jsonPath("$.username").value(customer2Username));
     }
 
     @Test
-    public void testDeleteCustomer() throws Exception {
-        doNothing().when(customerService).deleteCustomer(1L);
+    public void shouldDeleteCustomer() throws Exception {
+        doNothing().when(customerService).deleteCustomer(customer1Id);
 
-        mockMvc.perform(delete("/customers/{id}", 1L))
+        mockMvc.perform(delete("/customers/{id}", customer1Id))
                 .andExpect(status().isOk());
+
+        verify(customerService, times(1)).deleteCustomer(customer1Id);
     }
 }
