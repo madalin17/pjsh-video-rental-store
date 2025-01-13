@@ -74,11 +74,6 @@ public class RatingControllerTest {
         customer2Id = 2L;
         rating1Id = 1L;
 
-        video1.setId(video1Id);
-        video2.setId(video2Id);
-        customer1.setId(customer1Id);
-        customer2.setId(customer2Id);
-
         rating1 = new Rating(video1, customer1, rating1Score);
         rating2 = new Rating(video1, customer2, rating2Score);
 
@@ -129,7 +124,9 @@ public class RatingControllerTest {
         mockMvc.perform(get("/ratings/video/{videoId}", video1Id))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].score").value(rating1Score))
+                .andExpect(jsonPath("$[1].score").value(rating2Score));
     }
 
     @Test
@@ -137,7 +134,8 @@ public class RatingControllerTest {
         mockMvc.perform(get("/ratings/customer/{customerId}", customer1Id))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].score").value(rating1Score));
     }
 
     @Test

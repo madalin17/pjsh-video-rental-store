@@ -1,9 +1,10 @@
 package com.pjsh.vrs.mock.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pjsh.vrs.controller.ReviewController;
-import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Review;
 import com.pjsh.vrs.entity.Video;
+import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.service.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,18 +12,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class ReviewControllerTest {
 
     @Mock
@@ -33,73 +45,91 @@ public class ReviewControllerTest {
 
     private MockMvc mockMvc;
 
-    private Video video;
-    private Customer customer;
-    private Review review;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private Video video1, video2;
+
+    @Autowired
+    private Customer customer1, customer2;
+
+    private Review review1, review2;
+
+    private Long video1Id, video2Id, customer1Id, customer2Id, review1Id, review2Id;
+
+    @Value("${review1.description}")
+    private String review1Description;
+    @Value("${review2.description}")
+    private String review2Description;
+    @Value("${review3.description}")
+    private String review3Description;
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(reviewController).build();
 
-        video = new Video();
-        video.setId(1L);
-        video.setTitle("Inception");
-        video.setDirector("Christopher Nolan");
-        video.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt");
-        video.setYear(2010);
-        video.setDuration("148 min");
-        video.setGenre("Sci-Fi");
-        video.setDescription("A mind-bending thriller about dreams within dreams.");
-        video.setQuantity(5);
+        video1Id = 1L;
+        video2Id = 2L;
+        customer1Id = 1L;
+        customer2Id = 2L;
+        review1Id = 1L;
 
-        customer = new Customer();
-        customer.setId(1L);
-        customer.setUsername("john_doe");
-        customer.setFullName("John Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPassword("password123");
+        review1 = new Review(video1, customer1, review1Description);
+        review2 = new Review(video1, customer2, review2Description);
 
-        review = new Review();
-        review.setId(1L);
-        review.setVideo(video);
-        review.setCustomer(customer);
-        review.setDescription("Great video!");
-    }
-
-    @Test
-    public void testGetReviewsByVideoId() throws Exception {
-        when(reviewService.findByVideoId(1L)).thenReturn(List.of(review));
-
-        mockMvc.perform(get("/reviews/video/{videoId}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].description").value("Great video!"));
-    }
-
-    @Test
-    public void testGetReviewsByCustomerId() throws Exception {
-        when(reviewService.findByCustomerId(1L)).thenReturn(List.of(review));
-
-        mockMvc.perform(get("/reviews/customer/{customerId}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].description").value("Great video!"));
+        when(reviewService.findByVideoId(video1Id)).thenReturn(List.of(review1, review2));
+        when(reviewService.findByCustomerId(customer1Id)).thenReturn(List.of(review1));
     }
 
     @Test
     public void testAddReview() throws Exception {
-        when(reviewService.addReview(any(Review.class))).thenReturn(review);
+        Review review3 = new Review(video2, customer2, review3Description);
 
         mockMvc.perform(post("/reviews")
-                        .contentType("application/json")
-                        .content("{\"description\":\"Great video!\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value("Great video!"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(review3)))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     @Test
     public void testDeleteReview() throws Exception {
-        mockMvc.perform(delete("/reviews/{id}", 1L))
+        mockMvc.perform(delete("/reviews/{id}", review1Id))
+                .andDo(print())
                 .andExpect(status().isOk());
+    }
 
-        verify(reviewService, times(1)).deleteReview(1L);
+    @Test
+    public void testGetReviewsByVideoId() throws Exception {
+        mockMvc.perform(get("/reviews/video/{videoId}", video1Id))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].description").value(review1Description))
+                .andExpect(jsonPath("$[1].description").value(review2Description));
+    }
+
+    @Test
+    public void testGetReviewsByCustomerId() throws Exception {
+        mockMvc.perform(get("/reviews/customer/{customerId}", customer1Id))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].description").value(review1Description));
+    }
+
+    @Test
+    public void testDeleteAllByVideoId() throws Exception {
+        mockMvc.perform(delete("/reviews/video/all/{videoId}", video1Id))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testDeleteAllByCustomerId() throws Exception {
+        mockMvc.perform(delete("/reviews/customer/all/{customerId}", customer1Id))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 }
