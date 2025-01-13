@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RecommendationServiceIntegrationTest {
+public class RecommendationServiceTest {
 
     @Autowired
     private RecommendationService recommendationService;

@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RatingRepositoryIntegrationTest {
+public class RatingRepositoryTest {
 
     @Autowired
     private RatingRepository ratingRepository;

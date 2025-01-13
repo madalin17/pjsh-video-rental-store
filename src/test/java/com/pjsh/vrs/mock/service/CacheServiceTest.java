@@ -1,7 +1,5 @@
 package com.pjsh.vrs.mock.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.CacheService;
 import com.pjsh.vrs.service.provider.TimeProvider;
@@ -13,13 +11,22 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 class CacheServiceTest {
 
     @InjectMocks
@@ -28,49 +35,71 @@ class CacheServiceTest {
     @Mock
     private TimeProvider timeProvider;
 
+    @Autowired
+    private Video video1, video2;
+
+    private Long customer1Id, customer2Id;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        customer1Id = 1L;
+        customer2Id = 2L;
     }
 
     @Test
     void testStoreAndRetrieveRecommendations() {
-        Long customerId = 1L;
-        List<Video> recommendations = List.of(new Video(1L, "Title1", "Director1", "Actor1", 2021, "120min", "Drama", "Description", 5));
+        List<Video> recommendations = List.of(video1);
 
-        cacheService.storeRecommendationsInCache(customerId, recommendations);
+        cacheService.storeRecommendationsInCache(customer1Id, recommendations);
 
-        List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customerId);
+        List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customer1Id);
 
-        assertNotNull(cachedRecommendations);
-        assertEquals(recommendations, cachedRecommendations);
+        assertThat(cachedRecommendations).isNotNull();
+        assertThat(cachedRecommendations).containsExactly(video1);
+
+        verify(timeProvider, times(2)).now();
     }
 
     @Test
     void testCacheExpiration() {
-        Long customerId = 2L;
-        List<Video> recommendations = List.of(
-                new Video(2L, "Title2", "Director2", "Actor2", 2022, "130min", "Comedy", "Description", 4)
-        );
+        List<Video> recommendations = List.of(video2);
 
-        Mockito.when(timeProvider.now()).thenReturn(1000L);
+        when(timeProvider.now()).thenReturn(1000L);
 
-        cacheService.storeRecommendationsInCache(customerId, recommendations);
+        cacheService.storeRecommendationsInCache(customer2Id, recommendations);
 
-        Mockito.when(timeProvider.now()).thenReturn(1000L + TimeUnit.MINUTES.toMillis(11));
+        when(timeProvider.now()).thenReturn(1000L + TimeUnit.MINUTES.toMillis(11));
 
-        List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customerId);
-        assertNull(cachedRecommendations);
+        List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customer2Id);
+        assertThat(cachedRecommendations).isNull();
+
+        verify(timeProvider, times(2)).now();
     }
-
 
     @Test
     void testCacheMiss() {
-        Long customerId = 3L;
+        List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customer2Id);
 
-        List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customerId);
+        assertThat(cachedRecommendations).isNull();
 
-        assertNull(cachedRecommendations);
+        verifyNoInteractions(timeProvider);
+    }
+
+    @Test
+    void testRemoveExpiredEntries() {
+        List<Video> recommendations = List.of(video1);
+
+        when(timeProvider.now()).thenReturn(1000L);
+        cacheService.storeRecommendationsInCache(customer1Id, recommendations);
+
+        when(timeProvider.now()).thenReturn(1000L + TimeUnit.MINUTES.toMillis(11));
+        cacheService.removeExpiredEntries();
+
+        List<Video> cachedRecommendations = cacheService.getRecommendationsFromCache(customer1Id);
+        assertThat(cachedRecommendations).isNull();
+
+        verify(timeProvider, times(2)).now();
     }
 }
-

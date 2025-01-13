@@ -9,9 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class CustomerServiceTest {
 
     @Mock
@@ -28,60 +36,60 @@ public class CustomerServiceTest {
     @InjectMocks
     private CustomerService customerService;
 
-    private Customer customer;
+    @Autowired
+    private Customer customer1, customer2;
+
+    private Long customer1Id, customer2Id;
 
     @BeforeEach
     public void setUp() {
-        customer = new Customer();
-        customer.setId(1L);
-        customer.setUsername("john_doe");
-        customer.setFullName("John Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPassword("password123");
+        customer1Id = 1L;
+        customer2Id = 2L;
     }
 
     @Test
     public void testGetAllCustomers() {
-        when(customerRepository.findAll()).thenReturn(Arrays.asList(customer));
+        when(customerRepository.findAll()).thenReturn(List.of(customer1, customer2));
 
         List<Customer> customers = customerService.getAllCustomers();
         assertNotNull(customers);
-        assertEquals(1, customers.size());
-        assertEquals("john_doe", customers.get(0).getUsername());
+        assertEquals(2, customers.size());
+        assertEquals(customer1.getUsername(), customers.get(0).getUsername());
+        assertEquals(customer2.getUsername(), customers.get(1).getUsername());
     }
 
     @Test
     public void testGetCustomerById() {
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(customerRepository.findById(customer1Id)).thenReturn(Optional.of(customer1));
 
-        Optional<Customer> customer = customerService.getCustomerById(1L);
+        Optional<Customer> customer = customerService.getCustomerById(customer1Id);
         assertTrue(customer.isPresent());
-        assertEquals("john_doe", customer.get().getUsername());
+        assertEquals(customer1.getUsername(), customer.get().getUsername());
     }
 
     @Test
     public void testGetCustomerByEmail() {
-        when(customerRepository.findByEmail("john.doe@example.com")).thenReturn(customer);
+        when(customerRepository.findByEmail(customer1.getEmail())).thenReturn(customer1);
 
-        Customer result = customerService.getCustomerByEmail("john.doe@example.com");
+        Customer result = customerService.getCustomerByEmail(customer1.getEmail());
         assertNotNull(result);
-        assertEquals("john_doe", result.getUsername());
+        assertEquals(customer1.getUsername(), result.getUsername());
     }
 
     @Test
     public void testRegisterCustomer() {
-        when(customerRepository.save(customer)).thenReturn(customer);
+        when(customerRepository.save(customer2)).thenReturn(customer2);
 
-        Customer result = customerService.registerCustomer(customer);
+        Customer result = customerService.registerCustomer(customer2);
         assertNotNull(result);
-        assertEquals("john_doe", result.getUsername());
+        assertEquals(customer2.getUsername(), result.getUsername());
     }
 
     @Test
     public void testDeleteCustomer() {
-        doNothing().when(customerRepository).deleteById(1L);
+        doNothing().when(customerRepository).deleteById(customer1Id);
 
-        customerService.deleteCustomer(1L);
-        verify(customerRepository, times(1)).deleteById(1L);
+        customerService.deleteCustomer(customer1Id);
+        verify(customerRepository, times(1)).deleteById(customer1Id);
     }
 }

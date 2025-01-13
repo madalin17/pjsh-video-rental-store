@@ -38,6 +38,8 @@ class AuditServiceTest {
     @Mock
     private RatingEvent ratingEvent;
 
+    private Long video1Id, customer1Id, rating1Id, review1Id, rent1Id, return1Id;
+
     @Value("${rating1.score}")
     private Integer rating1Score;
     @Value("${review1.description}")
@@ -46,12 +48,19 @@ class AuditServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        video1Id = 1L;
+        customer1Id = 1L;
+        rating1Id = 1L;
+        review1Id = 1L;
+        rent1Id = 1L;
+        return1Id = 1L;
     }
 
     @Test
     void testAuditRent() {
-        when(rentEvent.getCustomerId()).thenReturn(1L);
-        when(rentEvent.getVideoId()).thenReturn(1L);
+        when(rentEvent.getCustomerId()).thenReturn(customer1Id);
+        when(rentEvent.getVideoId()).thenReturn(video1Id);
 
         auditService.auditRent(rentEvent);
 
@@ -61,7 +70,7 @@ class AuditServiceTest {
 
     @Test
     void testAuditReturn() {
-        when(returnEvent.getRentalId()).thenReturn(1L);
+        when(returnEvent.getRentalId()).thenReturn(rent1Id);
 
         auditService.auditReturn(returnEvent);
 
@@ -70,8 +79,8 @@ class AuditServiceTest {
 
     @Test
     void testAuditReview() {
-        when(reviewEvent.getCustomerId()).thenReturn(1L);
-        when(reviewEvent.getVideoId()).thenReturn(1L);
+        when(reviewEvent.getCustomerId()).thenReturn(customer1Id);
+        when(reviewEvent.getVideoId()).thenReturn(video1Id);
         when(reviewEvent.getReview()).thenReturn(review1Description);
 
         auditService.auditReview(reviewEvent);
@@ -83,8 +92,8 @@ class AuditServiceTest {
 
     @Test
     void testAuditRating() {
-        when(ratingEvent.getCustomerId()).thenReturn(1L);
-        when(ratingEvent.getVideoId()).thenReturn(1L);
+        when(ratingEvent.getCustomerId()).thenReturn(customer1Id);
+        when(ratingEvent.getVideoId()).thenReturn(video1Id);
         when(ratingEvent.getScore()).thenReturn(rating1Score);
 
         auditService.auditRating(ratingEvent);

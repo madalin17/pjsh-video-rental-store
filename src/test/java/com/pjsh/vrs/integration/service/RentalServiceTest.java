@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RentalServiceIntegrationTest {
+public class RentalServiceTest {
 
     @Autowired
     private RentalService rentalService;

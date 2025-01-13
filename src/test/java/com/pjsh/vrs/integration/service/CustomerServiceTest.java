@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class CustomerServiceIntegrationTest {
+public class CustomerServiceTest {
 
     @Autowired
     private CustomerService customerService;

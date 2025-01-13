@@ -3,7 +3,6 @@ package com.pjsh.vrs.integration.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Rental;
-import com.pjsh.vrs.entity.RentalStatus;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.RentalService;
 import com.pjsh.vrs.storage.CustomerRepository;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RentalControllerIntegrationTest {
+public class RentalControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

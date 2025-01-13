@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
-public class VideoServiceIntegrationTest {
+public class VideoServiceTest {
 
     @Autowired
     private VideoRepository videoRepository;

@@ -13,17 +13,23 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@ContextConfiguration(locations = "classpath:test-context.xml")
+@TestPropertySource("classpath:test.properties")
 public class RecommendationServiceTest {
 
     @Mock
@@ -36,49 +42,79 @@ public class RecommendationServiceTest {
     @InjectMocks
     private RecommendationService recommendationService;
 
+    @Autowired
     private Video video1, video2, video3;
-    private List<Video> allVideos;
-    private List<Video> rentedVideos;
+
+    private Long video1Id, video2Id, video3Id, customer1Id;
+
+    private List<Video> allVideos, recommendedVideos, rentedVideos;
 
     @BeforeEach
     public void setUp() {
-        video1 = new Video(1L, "Inception", "Christopher Nolan", "Leonardo DiCaprio,Joseph Gordon-Levitt", 2010, "148 min", "Sci-Fi,Thriller", "A mind-bending thriller about dreams within dreams.", 10);
-        video2 = new Video(2L, "Interstellar", "Christopher Nolan", "Matthew McConaughey,Anne Hathaway", 2014, "169 min", "Sci-Fi,Drama", "A space exploration story set in a dystopian future.", 8);
-        video3 = new Video(3L, "The Dark Knight", "Christopher Nolan", "Christian Bale,Heath Ledger", 2008, "152 min", "Action,Crime", "Batman faces the Joker in a battle for Gotham's soul.", 12);
+        video1Id = 1L;
+        video2Id = 2L;
+        video3Id = 3L;
+        customer1Id = 1L;
 
         allVideos = List.of(video1, video2, video3);
+        recommendedVideos = List.of(video3);
         rentedVideos = List.of(video1);
 
         when(videoRepository.findAll()).thenReturn(allVideos);
-        when(videoRepository.findRentedByCustomerId(1L)).thenReturn(rentedVideos);
+        when(videoRepository.findRentedByCustomerId(customer1Id)).thenReturn(rentedVideos);
     }
 
     @Test
     public void testGetRecommendationsFromCache() {
-        when(cacheService.getRecommendationsFromCache(1L)).thenReturn(allVideos);
+        when(cacheService.getRecommendationsFromCache(customer1Id)).thenReturn(recommendedVideos);
 
-        CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(1L);
+        CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(customer1Id);
 
-        assertThat(recommendations.join()).containsExactlyInAnyOrder(video1, video2, video3);
-        verify(cacheService, times(1)).getRecommendationsFromCache(1L);
+        assertThat(recommendations.join()).containsExactlyInAnyOrder(video3);
+        verify(cacheService, times(1)).getRecommendationsFromCache(customer1Id);
         verify(videoRepository, never()).findAll();
     }
 
     @Test
     public void testGenerateRecommendations() throws Exception {
-        when(cacheService.getRecommendationsFromCache(1L)).thenReturn(null);
+        when(cacheService.getRecommendationsFromCache(customer1Id)).thenReturn(null);
 
-        doReturn(List.of(video2, video3))
+        doReturn(recommendedVideos)
                 .when(recommendationService).findSimilarVideos(eq(video1), anyList());
 
-        CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(1L);
+        CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(customer1Id);
 
         List<Video> recommendedVideos = recommendations.join();
-        assertThat(recommendedVideos).containsExactlyInAnyOrder(video2, video3);
+        assertThat(recommendedVideos).containsExactlyInAnyOrder(video3);
 
         verify(videoRepository, times(1)).findAll();
-        verify(cacheService, times(1)).storeRecommendationsInCache(eq(1L), argThat(list ->
-                list.containsAll(List.of(video2, video3)) && list.size() == 2
+        verify(cacheService, times(1)).storeRecommendationsInCache(eq(customer1Id), argThat(list ->
+                list.contains(video3) && list.size() == 1
         ));
+    }
+
+    @Test
+    public void testNoRecommendationsGenerated() {
+        when(cacheService.getRecommendationsFromCache(customer1Id)).thenReturn(null);
+        doReturn(List.of()).when(recommendationService).findSimilarVideos(eq(video1), anyList());
+
+        CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(customer1Id);
+
+        List<Video> recommendedVideos = recommendations.join();
+        assertThat(recommendedVideos).isEmpty();
+
+        verify(videoRepository, times(1)).findAll();
+        verify(cacheService, times(1)).storeRecommendationsInCache(eq(customer1Id), eq(List.of()));
+    }
+
+    @Test
+    public void testFindSimilarVideos() {
+        video1.setId(video1Id);
+        video2.setId(video2Id);
+        video3.setId(video3Id);
+        List<Video> similarVideos = recommendationService.findSimilarVideos(video1, allVideos);
+
+        assertThat(similarVideos).contains(video3);
+        assertThat(similarVideos).doesNotContain(video1, video2);
     }
 }

@@ -1,13 +1,13 @@
 package com.pjsh.vrs.integration.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pjsh.vrs.entity.Rating;
+import com.pjsh.vrs.entity.Review;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.entity.Customer;
-import com.pjsh.vrs.storage.CustomerRepository;
-import com.pjsh.vrs.storage.RatingRepository;
+import com.pjsh.vrs.storage.ReviewRepository;
 import com.pjsh.vrs.storage.VideoRepository;
-import org.junit.jupiter.api.AfterAll;
+import com.pjsh.vrs.storage.CustomerRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RatingControllerIntegrationTest {
+public class ReviewControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,7 +41,7 @@ public class RatingControllerIntegrationTest {
     private CustomerRepository customerRepository;
 
     @Autowired
-    private RatingRepository ratingRepository;
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -56,18 +56,18 @@ public class RatingControllerIntegrationTest {
 
     private Customer testCustomer1, testCustomer2;
 
-    private Rating testRating1, testRating2;
+    private Review testReview1, testReview2;
 
-    @Value("${rating1.score}")
-    private int rating1Score;
-    @Value("${rating2.score}")
-    private int rating2Score;
-    @Value("${rating3.score}")
-    private int rating3Score;
+    @Value("${review1.description}")
+    private String review1Description;
+    @Value("${review2.description}")
+    private String review2Description;
+    @Value("${review3.description}")
+    private String review3Description;
 
     @BeforeEach
     public void setUp() {
-        ratingRepository.deleteAll();
+        reviewRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
 
@@ -77,86 +77,78 @@ public class RatingControllerIntegrationTest {
         testCustomer1 = customerRepository.save(new Customer(customer1));
         testCustomer2 = customerRepository.save(new Customer(customer2));
 
-        testRating1 = ratingRepository.save(new Rating(testVideo1, testCustomer1, rating1Score));
-        testRating2 = ratingRepository.save(new Rating(testVideo1, testCustomer2, rating2Score));
+        testReview1 = reviewRepository.save(new Review(testVideo1, testCustomer1, review1Description));
+        testReview2 = reviewRepository.save(new Review(testVideo1, testCustomer2, review2Description));
     }
 
-    @AfterAll
+    @AfterEach
     public void cleanUp() {
-        ratingRepository.deleteAll();
+        reviewRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testAddRating() throws Exception {
-        Rating rating = new Rating(testVideo2, testCustomer1, rating3Score);
+    public void testGetReviewsByVideoId() throws Exception {
+        mockMvc.perform(get("/reviews/video/{videoId}", testVideo1.getId()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].description").value(review1Description))
+                .andExpect(jsonPath("$[1].description").value(review2Description));
+    }
 
-        mockMvc.perform(post("/ratings")
+    @Test
+    public void testGetReviewsByCustomerId() throws Exception {
+        mockMvc.perform(get("/reviews/customer/{customerId}", testCustomer1.getId()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].description").value(review1Description));
+    }
+
+    @Test
+    public void testAddReview() throws Exception {
+        Review review = new Review(testVideo2, testCustomer1, review3Description);
+
+        mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(rating)))
+                        .content(objectMapper.writeValueAsString(review)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.score").value(rating3Score));
+                .andExpect(jsonPath("$.description").value(review3Description));
     }
 
     @Test
-    public void testDeleteRating() throws Exception {
-        mockMvc.perform(delete("/ratings/{id}", testRating1.getId()))
+    public void testDeleteReview() throws Exception {
+        mockMvc.perform(delete("/reviews/{id}", testReview1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/ratings/video/{videoId}", testVideo1.getId()))
+        mockMvc.perform(get("/reviews/video/{videoId}", testVideo1.getId()))
                 .andDo(print())
-                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test
-    public void testGetRatingsByVideoId() throws Exception {
-        mockMvc.perform(get("/ratings/video/{videoId}", testVideo1.getId()))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-    }
-
-    @Test
-    public void testGetRatingsByCustomerId() throws Exception {
-        mockMvc.perform(get("/ratings/customer/{customerId}", testCustomer1.getId()))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
-    @Test
-    public void testDeleteAllByVideoId() throws Exception {
-        mockMvc.perform(delete("/ratings/video/all/{videoId}", testVideo1.getId()))
+    public void testDeleteAllReviewsByVideoId() throws Exception {
+        mockMvc.perform(delete("/reviews/video/all/{videoId}", testVideo1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/ratings/video/{videoId}", testVideo1.getId()))
+        mockMvc.perform(get("/reviews/video/{videoId}", testVideo1.getId()))
                 .andDo(print())
-                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
-    public void testDeleteAllByCustomerId() throws Exception {
-        mockMvc.perform(delete("/ratings/customer/all/{customerId}", testCustomer1.getId()))
+    public void testDeleteAllReviewsByCustomerId() throws Exception {
+        mockMvc.perform(delete("/reviews/customer/all/{customerId}", testCustomer1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/ratings/customer/{customerId}", testCustomer1.getId()))
+        mockMvc.perform(get("/reviews/customer/{customerId}", testCustomer1.getId()))
                 .andDo(print())
-                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
-    }
-
-    @Test
-    public void testGetAverageScoreByVideoId() throws Exception {
-        mockMvc.perform(get("/ratings/average/{id}", testVideo1.getId()))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(String.valueOf((double) (rating1Score + rating2Score) / 2)));
     }
 }
