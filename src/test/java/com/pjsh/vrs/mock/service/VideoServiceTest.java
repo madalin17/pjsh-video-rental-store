@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class VideoServiceTest {
+class VideoServiceTest {
 
     @Mock
     private VideoRepository videoRepository;
@@ -47,13 +47,13 @@ public class VideoServiceTest {
     private int rating2Score;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         video1Id = 1L;
         video2Id = 2L;
     }
 
     @Test
-    public void testGetAllVideos() {
+    void testGetAllVideos() {
         when(videoRepository.findAll()).thenReturn(List.of(video1, video2));
 
         List<Video> videos = videoService.getAllVideos();
@@ -64,7 +64,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testGetVideoById() {
+    void testGetVideoById() {
         when(videoRepository.findById(video1Id)).thenReturn(Optional.of(video1));
 
         Optional<Video> video = videoService.getVideoById(video1Id);
@@ -74,7 +74,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testSearchVideosByTitle() {
+    void testSearchVideosByTitle() {
         when(videoRepository.findByTitleContainingIgnoreCase(video1.getTitle())).thenReturn(List.of(video1));
 
         List<Video> videos = videoService.searchVideosByTitle(video1.getTitle());
@@ -84,7 +84,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testAddVideo() {
+    void testAddVideo() {
         when(videoRepository.save(video2)).thenReturn(video2);
 
         Video result = videoService.addVideo(video2);
@@ -94,7 +94,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testDeleteVideo() {
+    void testDeleteVideo() {
         doNothing().when(videoRepository).deleteById(video1Id);
 
         videoService.deleteVideo(video1Id);

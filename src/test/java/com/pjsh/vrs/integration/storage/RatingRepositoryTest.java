@@ -6,6 +6,7 @@ import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.storage.RatingRepository;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +22,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RatingRepositoryTest {
+class RatingRepositoryTest {
 
     @Autowired
     private RatingRepository ratingRepository;
@@ -59,7 +61,7 @@ public class RatingRepositoryTest {
     private String customer2Email;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ratingRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -76,14 +78,14 @@ public class RatingRepositoryTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         ratingRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testFindByVideoId() {
+    void testFindByVideoId() {
         List<Rating> ratings = ratingRepository.findByVideoId(testVideo1.getId());
 
         assertNotNull(ratings);
@@ -93,7 +95,7 @@ public class RatingRepositoryTest {
     }
 
     @Test
-    public void testFindByCustomerId() {
+    void testFindByCustomerId() {
         List<Rating> ratings = ratingRepository.findByCustomerId(testCustomer1.getId());
 
         assertNotNull(ratings);
@@ -103,7 +105,7 @@ public class RatingRepositoryTest {
     }
 
     @Test
-    public void testDeleteAllByVideoId() {
+    void testDeleteAllByVideoId() {
         ratingRepository.deleteAllByVideoId(testVideo1.getId());
 
         List<Rating> ratings = ratingRepository.findByVideoId(testVideo1.getId());
@@ -111,7 +113,7 @@ public class RatingRepositoryTest {
     }
 
     @Test
-    public void testDeleteAllByCustomerId() {
+    void testDeleteAllByCustomerId() {
         ratingRepository.deleteAllByCustomerId(testCustomer1.getId());
 
         List<Rating> ratings = ratingRepository.findByCustomerId(testCustomer1.getId());
@@ -119,7 +121,7 @@ public class RatingRepositoryTest {
     }
 
     @Test
-    public void testCalculateAverageScoreByVideoId() {
+    void testCalculateAverageScoreByVideoId() {
         Double averageScore = ratingRepository.calculateAverageScoreByVideoId(testVideo1.getId());
 
         assertNotNull(averageScore);

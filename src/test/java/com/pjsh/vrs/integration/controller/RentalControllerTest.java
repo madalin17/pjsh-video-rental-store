@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RentalControllerTest {
+class RentalControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -61,7 +61,7 @@ public class RentalControllerTest {
     private Rental testRental1;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -74,14 +74,14 @@ public class RentalControllerTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testRentVideo() throws Exception {
+    void testRentVideo() throws Exception {
         mockMvc.perform(post("/rentals/rent")
                         .param("customerId", testCustomer1.getId().toString())
                         .param("videoId", testVideo1.getId().toString()))
@@ -93,7 +93,7 @@ public class RentalControllerTest {
     }
 
     @Test
-    public void testReturnVideo() throws Exception {
+    void testReturnVideo() throws Exception {
         mockMvc.perform(post("/rentals/return/{rentalId}", testRental1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -103,7 +103,7 @@ public class RentalControllerTest {
     }
 
     @Test
-    public void testGetRentalHistory() throws Exception {
+    void testGetRentalHistory() throws Exception {
         mockMvc.perform(get("/rentals/history/{customerId}", testCustomer1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -114,7 +114,7 @@ public class RentalControllerTest {
     }
 
     @Test
-    public void testRentUnavailableVideo() throws Exception {
+    void testRentUnavailableVideo() throws Exception {
         testVideo1.setQuantity(0);
         videoRepository.save(testVideo1);
 

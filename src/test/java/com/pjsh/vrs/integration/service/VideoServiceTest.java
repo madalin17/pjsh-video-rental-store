@@ -2,6 +2,7 @@ package com.pjsh.vrs.integration.service;
 
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
-public class VideoServiceTest {
+class VideoServiceTest {
 
     @Autowired
     private VideoRepository videoRepository;
@@ -28,7 +30,7 @@ public class VideoServiceTest {
     private Video testVideo1, testVideo2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         videoRepository.deleteAll();
 
         testVideo1 = videoRepository.save(new Video(video1));
@@ -36,12 +38,12 @@ public class VideoServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         videoRepository.deleteAll();
     }
 
     @Test
-    public void testFindAllVideos() {
+    void testFindAllVideos() {
         List<Video> videos = videoRepository.findAll();
 
         assertThat(videos).hasSize(2);
@@ -49,7 +51,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testFindVideoById() {
+    void testFindVideoById() {
         Video foundVideo = videoRepository.findById(testVideo1.getId()).orElse(null);
 
         assertThat(foundVideo).isNotNull();
@@ -58,7 +60,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testSaveNewVideo() {
+    void testSaveNewVideo() {
         Video testVideo3 = videoRepository.save(new Video(video3));
 
         assertThat(testVideo3.getId()).isNotNull();
@@ -66,7 +68,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testUpdateVideoQuantity() {
+    void testUpdateVideoQuantity() {
         Video videoToUpdate = videoRepository.findById(testVideo2.getId()).orElseThrow();
         videoToUpdate.setQuantity(10);
 
@@ -77,7 +79,7 @@ public class VideoServiceTest {
     }
 
     @Test
-    public void testDeleteVideo() {
+    void testDeleteVideo() {
         System.out.println(videoRepository.findAll());
         videoRepository.deleteById(testVideo1.getId());
 

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RatingServiceTest {
+class RatingServiceTest {
 
     @Autowired
     private RatingRepository ratingRepository;
@@ -62,7 +64,7 @@ public class RatingServiceTest {
     private String customer2Email;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ratingRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -77,14 +79,14 @@ public class RatingServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         ratingRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testAddMultipleRatings() {
+    void testAddMultipleRatings() {
         List<Rating> ratings = ratingRepository.findByVideoId(testVideo1.getId());
 
         assertThat(ratings).hasSize(2);
@@ -93,7 +95,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testUpdateRating() {
+    void testUpdateRating() {
         testRating2 = ratingRepository.save(new Rating(testVideo1, testCustomer2, rating3Score));
 
         Rating updatedRating = ratingRepository.save(testRating2);
@@ -104,7 +106,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testFindRatingsByCustomerId() {
+    void testFindRatingsByCustomerId() {
         List<Rating> ratings = ratingRepository.findByCustomerId(testCustomer1.getId());
 
         assertThat(ratings).hasSize(1);
@@ -112,14 +114,14 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testFindRatingsByInvalidVideoId() {
+    void testFindRatingsByInvalidVideoId() {
         List<Rating> ratings = ratingRepository.findByVideoId(999L);
 
         assertThat(ratings).isEmpty();
     }
 
     @Test
-    public void testDeleteAllRatingsForVideo() {
+    void testDeleteAllRatingsForVideo() {
         ratingRepository.deleteAllByVideoId(video1.getId());
 
         List<Rating> ratings = ratingRepository.findByVideoId(video1.getId());
@@ -127,7 +129,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testDeleteAllRatingsForCustomer() {
+    void testDeleteAllRatingsForCustomer() {
         ratingRepository.deleteAllByCustomerId(customer2.getId());
 
         List<Rating> ratings = ratingRepository.findByCustomerId(customer2.getId());
@@ -135,7 +137,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testFindRatingById() {
+    void testFindRatingById() {
         Optional<Rating> foundRating = ratingRepository.findById(testRating1.getId());
 
         assertThat(foundRating).isPresent();
@@ -143,7 +145,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testFindAverageScoreForVideo() {
+    void testFindAverageScoreForVideo() {
         Double averageScore = ratingRepository.calculateAverageScoreByVideoId(testVideo1.getId());
 
         assertThat(averageScore).isEqualTo((double) (rating1Score + rating2Score) / 2);

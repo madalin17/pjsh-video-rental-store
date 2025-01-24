@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RecommendationServiceTest {
+class RecommendationServiceTest {
 
     @Mock
     private VideoRepository videoRepository;
@@ -50,7 +50,7 @@ public class RecommendationServiceTest {
     private List<Video> allVideos, recommendedVideos, rentedVideos;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         video1Id = 1L;
         video2Id = 2L;
         video3Id = 3L;
@@ -66,18 +66,18 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendationsFromCache() {
+    void testGetRecommendationsFromCache() {
         when(cacheService.getRecommendationsFromCache(customer1Id)).thenReturn(recommendedVideos);
 
         CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(customer1Id);
 
-        assertThat(recommendations.join()).containsExactlyInAnyOrder(video3);
+        assertThat(recommendations.join()).containsExactlyInAnyOrder(video4);
         verify(cacheService, times(1)).getRecommendationsFromCache(customer1Id);
         verify(videoRepository, never()).findAll();
     }
 
     @Test
-    public void testGenerateRecommendations() throws Exception {
+    void testGenerateRecommendations() throws Exception {
         when(cacheService.getRecommendationsFromCache(customer1Id)).thenReturn(null);
 
         doReturn(recommendedVideos)
@@ -86,16 +86,16 @@ public class RecommendationServiceTest {
         CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(customer1Id);
 
         List<Video> recommendedVideos = recommendations.join();
-        assertThat(recommendedVideos).containsExactlyInAnyOrder(video3);
+        assertThat(recommendedVideos).containsExactlyInAnyOrder(video4);
 
         verify(videoRepository, times(1)).findAll();
         verify(cacheService, times(1)).storeRecommendationsInCache(eq(customer1Id), argThat(list ->
-                list.contains(video3) && list.size() == 1
+                list.contains(video4) && list.size() == 1
         ));
     }
 
     @Test
-    public void testNoRecommendationsGenerated() {
+    void testNoRecommendationsGenerated() {
         when(cacheService.getRecommendationsFromCache(customer1Id)).thenReturn(null);
         doReturn(List.of()).when(recommendationService).findSimilarVideos(eq(video1), anyList());
 
@@ -109,7 +109,7 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void testFindSimilarVideos() {
+    void testFindSimilarVideos() {
         video1.setId(video1Id);
         video2.setId(video2Id);
         video3.setId(video3Id);

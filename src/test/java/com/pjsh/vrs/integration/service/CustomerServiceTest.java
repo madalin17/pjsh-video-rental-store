@@ -3,6 +3,7 @@ package com.pjsh.vrs.integration.service;
 import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.service.CustomerService;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +19,11 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class CustomerServiceTest {
+class CustomerServiceTest {
 
     @Autowired
     private CustomerService customerService;
@@ -42,7 +44,7 @@ public class CustomerServiceTest {
     private String customer2FullName;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         customerRepository.deleteAll();
 
         testCustomer1 = customerRepository.save(new Customer(customer1));
@@ -50,12 +52,12 @@ public class CustomerServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testCreateCustomer() {
+    void testCreateCustomer() {
         assertThat(testCustomer1).isNotNull();
         assertThat(testCustomer1.getId()).isNotNull();
         assertThat(testCustomer1.getUsername()).isEqualTo(customer1Username);
@@ -64,7 +66,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testGetCustomerById() {
+    void testGetCustomerById() {
         Optional<Customer> fetchedCustomer = customerService.getCustomerById(testCustomer1.getId());
 
         assertThat(fetchedCustomer).isPresent();
@@ -72,7 +74,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testGetCustomerByEmail() {
+    void testGetCustomerByEmail() {
         Customer fetchedCustomer = customerService.getCustomerByEmail(customer1Email);
 
         assertThat(fetchedCustomer).isNotNull();
@@ -82,7 +84,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testUpdateCustomer() {
+    void testUpdateCustomer() {
         testCustomer1.setFullName(customer2FullName);
 
         Customer updatedCustomer = customerService.registerCustomer(testCustomer1);
@@ -93,7 +95,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testDeleteCustomer() {
+    void testDeleteCustomer() {
         customerService.deleteCustomer(testCustomer1.getId());
 
         Optional<Customer> deletedCustomer = customerRepository.findById(testCustomer1.getId());
@@ -101,7 +103,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testGetAllCustomers() {
+    void testGetAllCustomers() {
         Iterable<Customer> customers = customerService.getAllCustomers();
 
         assertThat(customers).hasSize(2);

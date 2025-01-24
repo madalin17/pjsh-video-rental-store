@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RentalServiceTest {
+class RentalServiceTest {
 
     @Mock
     private RentalRepository rentalRepository;
@@ -62,7 +62,7 @@ public class RentalServiceTest {
     private int video1Quantity;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         video1Id = 1L;
         customer1Id = 1L;
 
@@ -74,7 +74,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testRentVideo() {
+    void testRentVideo() {
         video1.setQuantity(video1Quantity);
         when(videoRepository.findById(video1Id)).thenReturn(Optional.of(video1));
         when(customerRepository.findById(customer1Id)).thenReturn(Optional.of(customer1));
@@ -88,7 +88,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testReturnVideo() {
+    void testReturnVideo() {
         video1.setQuantity(video1Quantity);
         rental1.setStatus(RentalStatus.RENTED);
         when(rentalRepository.findById(rental1.getId())).thenReturn(Optional.of(rental1));
@@ -102,7 +102,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testGetRentalHistory() {
+    void testGetRentalHistory() {
         when(customerRepository.findById(customer1Id)).thenReturn(Optional.of(customer1));
         when(rentalRepository.findByCustomer(customer1)).thenReturn(List.of(rental1));
 
@@ -113,7 +113,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testRentVideoOutOfStock() {
+    void testRentVideoOutOfStock() {
         video1.setQuantity(0);
         when(videoRepository.findById(video1Id)).thenReturn(Optional.of(video1));
 
@@ -127,7 +127,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testReturnAlreadyReturnedVideo() {
+    void testReturnAlreadyReturnedVideo() {
         rental1.setStatus(RentalStatus.RETURNED);
         when(rentalRepository.findById(rental1.getId())).thenReturn(Optional.of(rental1));
 

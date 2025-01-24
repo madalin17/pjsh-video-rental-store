@@ -14,6 +14,7 @@ import com.pjsh.vrs.storage.RatingRepository;
 import com.pjsh.vrs.storage.ReviewRepository;
 import com.pjsh.vrs.storage.RentalRepository;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +32,11 @@ import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class AuditServiceTest {
+class AuditServiceTest {
 
     @Autowired
     private ApplicationContext context;
@@ -84,7 +86,7 @@ public class AuditServiceTest {
     private String review1Description;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         rentalRepository.deleteAll();
         ratingRepository.deleteAll();
         reviewRepository.deleteAll();
@@ -100,7 +102,7 @@ public class AuditServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         System.setOut(System.out);
         rentalRepository.deleteAll();
         ratingRepository.deleteAll();
@@ -110,7 +112,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testCreateRatingAudits() throws InterruptedException {
+    void testCreateRatingAudits() {
         System.setOut(new PrintStream(outputStreamCaptor));
 
         Rating rating = new Rating(testVideo1, testCustomer1, rating1Score);
@@ -121,7 +123,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testCreateReviewAudits() throws InterruptedException {
+    void testCreateReviewAudits() {
         System.setOut(new PrintStream(outputStreamCaptor));
 
         Review review = new Review(testVideo1, testCustomer1, review1Description);
@@ -132,7 +134,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testReturnVideoAudits() throws InterruptedException {
+    void testReturnVideoAudits() {
         Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
         rentalService.returnVideo(rental.getId());

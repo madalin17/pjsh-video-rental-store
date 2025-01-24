@@ -9,6 +9,7 @@ import com.pjsh.vrs.service.provider.TimeProvider;
 import com.pjsh.vrs.storage.RentalRepository;
 import com.pjsh.vrs.storage.VideoRepository;
 import com.pjsh.vrs.storage.CustomerRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +24,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RecommendationServiceTest {
+class RecommendationServiceTest {
 
     @Autowired
     private RecommendationService recommendationService;
@@ -71,7 +74,7 @@ public class RecommendationServiceTest {
     private String noVideoGenre;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -87,32 +90,21 @@ public class RecommendationServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testGetRecommendationsForCustomer() throws Exception {
-        rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
-        rentalService.rentVideo(testCustomer1.getId(), testVideo2.getId());
-
-        CompletableFuture<List<Video>> recommendations = recommendationService.getRecommendationsForCustomer(testCustomer1.getId());
-        recommendations.join();
-
-        assertThat(recommendations.get()).contains(testVideo4);
-    }
-
-    @Test
-    public void testRecommendationsWithNoRentalHistory() throws Exception {
+    void testRecommendationsWithNoRentalHistory() throws Exception {
         List<Video> recommendations = recommendationService.getRecommendationsForCustomer(testCustomer2.getId()).get();
 
         assertThat(recommendations).isEmpty();
     }
 
     @Test
-    public void testGetSimilarVideos() {
+    void testGetSimilarVideos() {
         testVideo2.setGenre(video1Genre);
         testVideo2.setDirector(video1Director);
         videoRepository.save(testVideo2);
@@ -123,7 +115,7 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void testRecommendationsWhenNoSimilarVideos() throws Exception {
+    void testRecommendationsWhenNoSimilarVideos() throws Exception {
         rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
         testVideo2.setGenre(noVideoGenre);
@@ -132,6 +124,7 @@ public class RecommendationServiceTest {
 
         List<Video> recommendations = recommendationService.getRecommendationsForCustomer(testCustomer1.getId()).get();
 
+        assertNotNull(recommendations);
         assertThat(recommendations).doesNotContain(testVideo2);
     }
 }

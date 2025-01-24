@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class ReviewServiceTest {
+class ReviewServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
@@ -54,7 +54,7 @@ public class ReviewServiceTest {
     private String review2Description;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         video1Id = 1L;
         video2Id = 2L;
         customer1Id = 1L;
@@ -67,7 +67,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testGetReviewsByVideoId() {
+    void testGetReviewsByVideoId() {
         when(reviewRepository.findByVideoId(video1Id)).thenReturn(List.of(review1, review2));
 
         List<Review> reviews = reviewService.findByVideoId(video1Id);
@@ -78,7 +78,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testGetReviewsByCustomerId() {
+    void testGetReviewsByCustomerId() {
         when(reviewRepository.findByCustomerId(customer1Id)).thenReturn(List.of(review1));
 
         List<Review> reviews = reviewService.findByCustomerId(customer1Id);
@@ -88,7 +88,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testAddReview() {
+    void testAddReview() {
         when(reviewRepository.save(review2)).thenReturn(review2);
 
         Review addedReview = reviewService.addReview(review2);
@@ -98,7 +98,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testDeleteReview() {
+    void testDeleteReview() {
         doNothing().when(reviewRepository).deleteById(review1Id);
 
         reviewService.deleteReview(review1Id);
@@ -107,7 +107,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testDeleteAllByVideoId() {
+    void testDeleteAllByVideoId() {
         doNothing().when(reviewRepository).deleteAllByVideoId(video1Id);
 
         reviewService.deleteAllByVideoId(video1Id);
@@ -116,7 +116,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testDeleteAllByCustomerId() {
+    void testDeleteAllByCustomerId() {
         doNothing().when(reviewRepository).deleteAllByCustomerId(customer1Id);
 
         reviewService.deleteAllByCustomerId(customer1Id);

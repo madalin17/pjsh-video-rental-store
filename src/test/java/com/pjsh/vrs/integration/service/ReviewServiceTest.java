@@ -11,9 +11,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +24,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @Transactional
+@DirtiesContext
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class ReviewServiceTest {
+class ReviewServiceTest {
 
     @Autowired
     private ReviewService reviewService;
@@ -63,7 +68,7 @@ public class ReviewServiceTest {
     private String review4Description;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         reviewRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -80,14 +85,14 @@ public class ReviewServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         reviewRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testGetReviewsByVideoId() {
+    void testGetReviewsByVideoId() {
         List<Review> reviews = reviewService.findByVideoId(testVideo1.getId());
         assertThat(reviews).hasSize(2);
         assertThat(reviews.get(0).getDescription()).isEqualTo(review1Description);
@@ -95,7 +100,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testGetReviewsByCustomerId() {
+    void testGetReviewsByCustomerId() {
         List<Review> reviews = reviewService.findByCustomerId(testCustomer1.getId());
         assertThat(reviews).hasSize(2);
         assertThat(reviews.get(0).getDescription()).isEqualTo(review1Description);
@@ -103,7 +108,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testAddReview() {
+    void testAddReview() {
         Review testReview4 = new Review();
         testReview4.setCustomer(testCustomer2);
         testReview4.setVideo(testVideo2);
@@ -111,7 +116,7 @@ public class ReviewServiceTest {
 
         Review savedReview = reviewService.addReview(testReview4);
 
-        assertThat(savedReview.getId()).isNotNull();
+        assertNotNull(savedReview.getId());
         assertThat(savedReview.getDescription()).isEqualTo(review4Description);
 
         List<Review> reviews = reviewService.findByVideoId(testVideo2.getId());
@@ -119,7 +124,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testUpdateReview() {
+    void testUpdateReview() {
         testReview1.setDescription("Updated review: Fantastic movie!");
         Review updatedReview = reviewService.addReview(testReview1);
 
@@ -130,7 +135,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testDeleteReviewById() {
+    void testDeleteReviewById() {
         reviewService.deleteReview(testReview1.getId());
 
         List<Review> reviews = reviewService.findByVideoId(testVideo1.getId());
@@ -138,7 +143,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testDeleteAllReviewsByVideoId() {
+    void testDeleteAllReviewsByVideoId() {
         reviewService.deleteAllByVideoId(testVideo1.getId());
 
         List<Review> reviews = reviewService.findByVideoId(testVideo1.getId());
@@ -146,7 +151,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testDeleteAllReviewsByCustomerId() {
+    void testDeleteAllReviewsByCustomerId() {
         reviewService.deleteAllByCustomerId(testCustomer1.getId());
 
         List<Review> reviews = reviewService.findByCustomerId(testCustomer1.getId());
@@ -157,7 +162,7 @@ public class ReviewServiceTest {
     }
 
     @Test
-    public void testGetReviewById() {
+    void testGetReviewById() {
         Review fetchedReview = reviewService.getReview(testReview1.getId());
         assertThat(fetchedReview).isNotNull();
         assertThat(fetchedReview.getDescription()).isEqualTo(review1Description);

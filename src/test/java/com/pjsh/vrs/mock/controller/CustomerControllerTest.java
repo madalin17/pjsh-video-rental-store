@@ -32,8 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-
-public class CustomerControllerTest {
+class CustomerControllerTest {
 
     @Mock
     private CustomerService customerService;
@@ -61,7 +60,7 @@ public class CustomerControllerTest {
     private String customer2Username;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(customerController).build();
 
         customer1Id = 1L;
@@ -69,7 +68,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void shouldReturnAllCustomers() throws Exception {
+    void shouldReturnAllCustomers() throws Exception {
         List<Customer> customerList = Arrays.asList(customer1, customer2);
         when(customerService.getAllCustomers()).thenReturn(customerList);
 
@@ -81,7 +80,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void shouldReturnCustomerById() throws Exception {
+    void shouldReturnCustomerById() throws Exception {
         when(customerService.getCustomerById(customer1Id)).thenReturn(java.util.Optional.of(customer1));
 
         mockMvc.perform(get("/customers/{id}", customer1Id))
@@ -91,7 +90,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void shouldReturnCustomerByEmail() throws Exception {
+    void shouldReturnCustomerByEmail() throws Exception {
         when(customerService.getCustomerByEmail(customer1Email)).thenReturn(customer1);
 
         mockMvc.perform(get("/customers/email").param("email", customer1Email))
@@ -101,7 +100,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void shouldRegisterCustomer() throws Exception {
+    void shouldRegisterCustomer() throws Exception {
         when(customerService.registerCustomer(customer2)).thenReturn(customer2);
 
         System.out.println(objectMapper.writeValueAsString(customer2));
@@ -114,7 +113,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void shouldDeleteCustomer() throws Exception {
+    void shouldDeleteCustomer() throws Exception {
         doNothing().when(customerService).deleteCustomer(customer1Id);
 
         mockMvc.perform(delete("/customers/{id}", customer1Id))

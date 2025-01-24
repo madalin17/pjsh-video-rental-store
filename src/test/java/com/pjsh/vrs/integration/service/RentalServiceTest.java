@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RentalServiceTest {
+class RentalServiceTest {
 
     @Autowired
     private RentalService rentalService;
@@ -59,7 +59,7 @@ public class RentalServiceTest {
     private String video1Title;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -70,14 +70,14 @@ public class RentalServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testRentAndReturnVideo() {
+    void testRentAndReturnVideo() {
         Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         assertThat(rental).isNotNull();
         assertThat(rental.getCustomer().getId()).isEqualTo(testCustomer1.getId());
@@ -91,7 +91,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testRentVideoWhenOutOfStock() {
+    void testRentVideoWhenOutOfStock() {
         testVideo1.setQuantity(0);
         videoRepository.save(testVideo1);
 
@@ -101,7 +101,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testReturnVideoThatIsAlreadyReturned() {
+    void testReturnVideoThatIsAlreadyReturned() {
         Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         rentalService.returnVideo(rental.getId());
 
@@ -111,7 +111,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testGetRentalHistory() {
+    void testGetRentalHistory() {
         Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
         List<Rental> rentals = rentalService.getRentalHistory(testCustomer1.getId());
@@ -121,21 +121,21 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testRentVideoWithNonExistenttestCustomer1() {
+    void testRentVideoWithNonExistenttestCustomer1() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> rentalService.rentVideo(999L, testVideo1.getId()));
         assertThat(exception.getMessage()).isEqualTo("Customer not found");
     }
 
     @Test
-    public void testRentVideoWithNonExistentVideo() {
+    void testRentVideoWithNonExistentVideo() {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> rentalService.rentVideo(testCustomer1.getId(), 999L));
         assertThat(exception.getMessage()).isEqualTo("Video not found");
     }
 
     @Test
-    public void testRentVideoReducesStockCorrectly() {
+    void testRentVideoReducesStockCorrectly() {
         for (int i = 0; i < 3; i++) {
             rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         }
@@ -144,7 +144,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testReturnVideoUpdatesRentalAndVideo() {
+    void testReturnVideoUpdatesRentalAndVideo() {
         Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 
         Rental returnedRental = rentalService.returnVideo(rental.getId());
@@ -155,7 +155,7 @@ public class RentalServiceTest {
     }
 
     @Test
-    public void testGetRentalHistoryFortCustomerWithNoRentals() {
+    void testGetRentalHistoryFortCustomerWithNoRentals() {
         List<Rental> rentals = rentalService.getRentalHistory(testCustomer1.getId());
         assertThat(rentals).isEmpty();
     }

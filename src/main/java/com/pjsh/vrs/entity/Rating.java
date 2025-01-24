@@ -1,10 +1,16 @@
 package com.pjsh.vrs.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "ratings")
 public class Rating extends Interaction {
+
+    @JsonIgnore
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
     private Integer score;
@@ -30,6 +36,14 @@ public class Rating extends Interaction {
                 .append(score);
 
         return builder.toString();
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Integer getScore() {

@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class CustomerControllerTest {
+class CustomerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,7 +54,7 @@ public class CustomerControllerTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         customerRepository.deleteAll();
 
         testCustomer1 = customerRepository.save(new Customer(customer1));
@@ -62,12 +62,12 @@ public class CustomerControllerTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testGetAllCustomers() throws Exception {
+    void testGetAllCustomers() throws Exception {
         mockMvc.perform(get("/customers"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -77,7 +77,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testGetCustomerById() throws Exception {
+    void testGetCustomerById() throws Exception {
         mockMvc.perform(get("/customers/{id}", testCustomer1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -86,7 +86,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testGetCustomerByEmail() throws Exception {
+    void testGetCustomerByEmail() throws Exception {
         mockMvc.perform(get("/customers/email").param("email", customer1Email))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -95,7 +95,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testRegisterCustomer() throws Exception {
+    void testRegisterCustomer() throws Exception {
         mockMvc.perform(post("/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customer3)))
@@ -106,7 +106,7 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void testDeleteCustomer() throws Exception {
+    void testDeleteCustomer() throws Exception {
         mockMvc.perform(delete("/customers/{id}", testCustomer1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());

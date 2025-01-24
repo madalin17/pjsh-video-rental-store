@@ -1,5 +1,6 @@
 package com.pjsh.vrs.controller;
 
+import com.pjsh.vrs.controller.future.RecommendationFutureStore;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.service.RecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 @RestController
 @RequestMapping("/recommendations")
@@ -22,19 +22,23 @@ public class RecommendationController {
     @Autowired
     private RecommendationService recommendationService;
 
-    private final ConcurrentHashMap<Long, CompletableFuture<List<Video>>> futures = new ConcurrentHashMap<>();
+    @Autowired
+    private RecommendationFutureStore futureStore;
 
     @GetMapping("/{customerId}")
     public ResponseEntity<List<Video>> getRecommendations(@PathVariable Long customerId) {
-        CompletableFuture<List<Video>> recommendationsFuture = futures.getOrDefault(customerId, null);
+        CompletableFuture<List<Video>> recommendationsFuture = (CompletableFuture<List<Video>>)
+                futureStore.getOrDefault(customerId, null);
 
         if (recommendationsFuture == null) {
             recommendationsFuture = recommendationService.getRecommendationsForCustomer(customerId);
 
-            futures.put(customerId, recommendationsFuture);
+            futureStore.put(customerId, recommendationsFuture);
 
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.emptyList());
         } else if (recommendationsFuture.isDone()) {
+            futureStore.remove(customerId);
+
             try {
                 List<Video> recommendations = recommendationsFuture.get();
 

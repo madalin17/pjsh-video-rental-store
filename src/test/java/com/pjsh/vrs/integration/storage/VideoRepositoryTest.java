@@ -7,6 +7,7 @@ import com.pjsh.vrs.entity.RentalStatus;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.storage.RentalRepository;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class VideoRepositoryTest {
+class VideoRepositoryTest {
 
     @Autowired
     private VideoRepository videoRepository;
@@ -56,7 +58,7 @@ public class VideoRepositoryTest {
     private String video2Title;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -80,14 +82,14 @@ public class VideoRepositoryTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testFindByTitleContainingIgnoreCase() {
+    void testFindByTitleContainingIgnoreCase() {
         List<Video> videos = videoRepository.findByTitleContainingIgnoreCase(video1LowercaseTitle);
 
         assertNotNull(videos);
@@ -96,7 +98,7 @@ public class VideoRepositoryTest {
     }
 
     @Test
-    public void testFindByGenre() {
+    void testFindByGenre() {
         List<Video> videos = videoRepository.findByGenre(video1Genre);
 
         assertNotNull(videos);
@@ -105,7 +107,7 @@ public class VideoRepositoryTest {
     }
 
     @Test
-    public void testFindRentedByCustomerId() {
+    void testFindRentedByCustomerId() {
         List<Video> rentedVideos = videoRepository.findRentedByCustomerId(testCustomer1.getId());
 
         assertNotNull(rentedVideos);

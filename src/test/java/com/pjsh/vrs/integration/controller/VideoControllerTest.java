@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class VideoControllerTest {
+class VideoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,7 +51,7 @@ public class VideoControllerTest {
     private String video3Title;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         videoRepository.deleteAll();
 
         testVideo1 = videoRepository.save(new Video(video1));
@@ -59,12 +59,12 @@ public class VideoControllerTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         videoRepository.deleteAll();
     }
 
     @Test
-    public void testGetAllVideos() throws Exception {
+    void testGetAllVideos() throws Exception {
         mockMvc.perform(get("/videos"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -74,7 +74,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testGetVideoById() throws Exception {
+    void testGetVideoById() throws Exception {
         mockMvc.perform(get("/videos/{id}", testVideo1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -82,7 +82,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testSearchVideosByTitle() throws Exception {
+    void testSearchVideosByTitle() throws Exception {
         mockMvc.perform(get("/videos/search").param("title", video1Title))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -91,7 +91,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testGetVideosByGenre() throws Exception {
+    void testGetVideosByGenre() throws Exception {
         mockMvc.perform(get("/videos/genre/{genre}", video1.getGenre()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -100,7 +100,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testAddVideo() throws Exception {
+    void testAddVideo() throws Exception {
         mockMvc.perform(post("/videos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(video3)))
@@ -113,7 +113,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testDeleteVideo() throws Exception {
+    void testDeleteVideo() throws Exception {
         mockMvc.perform(delete("/videos/{id}", testVideo1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());

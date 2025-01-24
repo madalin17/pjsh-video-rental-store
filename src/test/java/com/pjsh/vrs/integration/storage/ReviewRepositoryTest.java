@@ -6,13 +6,13 @@ import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.storage.ReviewRepository;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -22,11 +22,11 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class ReviewRepositoryTest {
+class ReviewRepositoryTest {
 
     @Autowired
     private ReviewRepository reviewRepository;
@@ -78,7 +78,7 @@ public class ReviewRepositoryTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         reviewRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();

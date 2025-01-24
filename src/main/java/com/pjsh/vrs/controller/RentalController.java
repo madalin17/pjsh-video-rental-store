@@ -16,7 +16,6 @@ public class RentalController {
     @Autowired
     private RentalService rentalService;
 
-    // Rent a video
     @PostMapping("/rent")
     public ResponseEntity<?> rentVideo(@RequestParam Long customerId, @RequestParam Long videoId) {
         try {
@@ -27,7 +26,6 @@ public class RentalController {
         }
     }
 
-    // Return a video
     @PostMapping("/return/{rentalId}")
     public ResponseEntity<?> returnVideo(@PathVariable Long rentalId) {
         try {
@@ -38,7 +36,6 @@ public class RentalController {
         }
     }
 
-    // View rental history for a customer
     @GetMapping("/history/{customerId}")
     public ResponseEntity<List<Rental>> getRentalHistory(@PathVariable Long customerId) {
         List<Rental> rentalHistory = rentalService.getRentalHistory(customerId);

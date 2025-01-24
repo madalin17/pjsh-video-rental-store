@@ -7,6 +7,7 @@ import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.storage.CustomerRepository;
 import com.pjsh.vrs.storage.RentalRepository;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,9 +21,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
-public class RentalRepositoryTest {
+class RentalRepositoryTest {
 
     @Autowired
     private RentalRepository rentalRepository;
@@ -46,7 +48,7 @@ public class RentalRepositoryTest {
     private Rental testRental1, testRetal2, testRental3;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -77,14 +79,14 @@ public class RentalRepositoryTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testFindByCustomer() {
+    void testFindByCustomer() {
         List<Rental> rentals = rentalRepository.findByCustomer(testCustomer1);
 
         assertNotNull(rentals);
@@ -94,7 +96,7 @@ public class RentalRepositoryTest {
     }
 
     @Test
-    public void testFindByVideo() {
+    void testFindByVideo() {
         List<Rental> rentals = rentalRepository.findByVideo(testVideo1);
 
         assertNotNull(rentals);
@@ -104,7 +106,7 @@ public class RentalRepositoryTest {
     }
 
     @Test
-    public void testFindByStatus() {
+    void testFindByStatus() {
         List<Rental> rented = rentalRepository.findByStatus(RentalStatus.RENTED);
 
         assertNotNull(rented);

@@ -2,6 +2,7 @@ package com.pjsh.vrs.integration.storage;
 
 import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.storage.CustomerRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +16,11 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class CustomerRepositoryTest {
+class CustomerRepositoryTest {
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -36,7 +38,7 @@ public class CustomerRepositoryTest {
     private String noCustomerEmail;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         customerRepository.deleteAll();
 
         testCustomer1 = customerRepository.save(new Customer(customer1));
@@ -44,19 +46,19 @@ public class CustomerRepositoryTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testSaveCustomer() {
+    void testSaveCustomer() {
         assertNotNull(testCustomer1.getId());
         assertEquals(customer1FullName, testCustomer1.getFullName());
         assertEquals(customer1Email, testCustomer1.getEmail());
     }
 
     @Test
-    public void testFindByEmail() {
+    void testFindByEmail() {
         Customer foundCustomer = customerRepository.findByEmail(customer1Email);
 
         assertNotNull(foundCustomer);
@@ -65,14 +67,14 @@ public class CustomerRepositoryTest {
     }
 
     @Test
-    public void testFindByEmailNotFound() {
+    void testFindByEmailNotFound() {
         Customer foundCustomer = customerRepository.findByEmail(noCustomerEmail);
 
         assertNull(foundCustomer);
     }
 
     @Test
-    public void testDeleteCustomer() {
+    void testDeleteCustomer() {
         customerRepository.delete(testCustomer1);
 
         Customer deletedCustomer = customerRepository.findByEmail(customer1Email);
@@ -81,7 +83,7 @@ public class CustomerRepositoryTest {
     }
 
     @Test
-    public void testCustomerPersistence() {
+    void testCustomerPersistence() {
         customerRepository.save(testCustomer1);
 
         Customer persistedCustomer = customerRepository.findByEmail(customer1Email);

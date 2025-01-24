@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class ReviewControllerTest {
+class ReviewControllerTest {
 
     @Mock
     private VideoService videoService;
@@ -76,7 +76,7 @@ public class ReviewControllerTest {
     private String review3Description;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(reviewController).build();
 
         video1Id = 1L;
@@ -93,7 +93,7 @@ public class ReviewControllerTest {
     }
 
     @Test
-    public void testAddReview() throws Exception {
+    void testAddReview() throws Exception {
         ReviewRequest request = new ReviewRequest();
         request.setTitle(video2.getTitle());
         request.setUsername(customer2.getUsername());
@@ -110,14 +110,14 @@ public class ReviewControllerTest {
     }
 
     @Test
-    public void testDeleteReview() throws Exception {
+    void testDeleteReview() throws Exception {
         mockMvc.perform(delete("/reviews/{id}", review1Id))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testGetReviewsByVideoId() throws Exception {
+    void testGetReviewsByVideoId() throws Exception {
         mockMvc.perform(get("/reviews/video/{videoId}", video1Id))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -127,7 +127,7 @@ public class ReviewControllerTest {
     }
 
     @Test
-    public void testGetReviewsByCustomerId() throws Exception {
+    void testGetReviewsByCustomerId() throws Exception {
         mockMvc.perform(get("/reviews/customer/{customerId}", customer1Id))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -136,14 +136,14 @@ public class ReviewControllerTest {
     }
 
     @Test
-    public void testDeleteAllByVideoId() throws Exception {
+    void testDeleteAllByVideoId() throws Exception {
         mockMvc.perform(delete("/reviews/video/all/{videoId}", video1Id))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testDeleteAllByCustomerId() throws Exception {
+    void testDeleteAllByCustomerId() throws Exception {
         mockMvc.perform(delete("/reviews/customer/all/{customerId}", customer1Id))
                 .andDo(print())
                 .andExpect(status().isOk());

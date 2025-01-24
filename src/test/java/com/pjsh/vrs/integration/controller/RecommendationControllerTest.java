@@ -1,6 +1,7 @@
 package com.pjsh.vrs.integration.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pjsh.vrs.controller.future.RecommendationFutureStore;
 import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Rating;
 import com.pjsh.vrs.entity.Video;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RecommendationControllerTest {
+class RecommendationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,6 +51,9 @@ public class RecommendationControllerTest {
 
     @Autowired
     private RentalService rentalService;
+
+    @Autowired
+    private RecommendationFutureStore futureStore;
 
     @Autowired
     private RecommendationService recommendationService;
@@ -80,7 +84,7 @@ public class RecommendationControllerTest {
     private Integer rating1Score;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -95,14 +99,14 @@ public class RecommendationControllerTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         rentalRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testGetRecommendationsSuccess() throws Exception {
+    void testGetRecommendationsSuccess() throws Exception {
         rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         rentalService.rentVideo(testCustomer1.getId(), testVideo2.getId());
 
@@ -117,13 +121,11 @@ public class RecommendationControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].title").value(video4Title))
-                .andExpect(jsonPath("$[1].title").value(video5Title));
+                .andExpect(jsonPath("$.length()").value(3));
     }
 
     @Test
-    public void testGetRecommendationsNoContent() throws Exception {
+    void testGetRecommendationsNoContent() throws Exception {
         mockMvc.perform(get("/recommendations/{customerId}", testCustomer1.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())

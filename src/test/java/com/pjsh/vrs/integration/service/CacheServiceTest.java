@@ -5,6 +5,7 @@ import com.pjsh.vrs.service.CacheService;
 import com.pjsh.vrs.service.provider.TestTimeProvider;
 import com.pjsh.vrs.service.provider.TimeProvider;
 import com.pjsh.vrs.storage.VideoRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +22,11 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class CacheServiceTest {
+class CacheServiceTest {
 
     @Autowired
     private CacheService cacheService;
@@ -45,7 +47,7 @@ public class CacheServiceTest {
     private String video2Title;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         videoRepository.deleteAll();
 
         timeProvider = new TestTimeProvider(System.currentTimeMillis());
@@ -56,12 +58,12 @@ public class CacheServiceTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         videoRepository.deleteAll();
     }
 
     @Test
-    public void testStoreAndRetrieveRecommendationsFromCache() {
+    void testStoreAndRetrieveRecommendationsFromCache() {
         Long customerId = 1L;
 
         cacheService.storeRecommendationsInCache(customerId, List.of(testVideo1, testVideo2));
@@ -75,7 +77,7 @@ public class CacheServiceTest {
     }
 
     @Test
-    public void testRetrieveNonExistentCache() {
+    void testRetrieveNonExistentCache() {
         Long customerId = 2L;
 
         List<Video> cachedVideos = cacheService.getRecommendationsFromCache(customerId);
@@ -84,7 +86,7 @@ public class CacheServiceTest {
     }
 
     @Test
-    public void testCacheExpiration() {
+    void testCacheExpiration() {
         Long customerId = 1L;
 
         cacheService.storeRecommendationsInCache(customerId, List.of(testVideo1, testVideo2));

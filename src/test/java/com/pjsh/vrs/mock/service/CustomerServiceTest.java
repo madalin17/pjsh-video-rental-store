@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class CustomerServiceTest {
+class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
@@ -42,13 +42,13 @@ public class CustomerServiceTest {
     private Long customer1Id, customer2Id;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         customer1Id = 1L;
         customer2Id = 2L;
     }
 
     @Test
-    public void testGetAllCustomers() {
+    void testGetAllCustomers() {
         when(customerRepository.findAll()).thenReturn(List.of(customer1, customer2));
 
         List<Customer> customers = customerService.getAllCustomers();
@@ -59,7 +59,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testGetCustomerById() {
+    void testGetCustomerById() {
         when(customerRepository.findById(customer1Id)).thenReturn(Optional.of(customer1));
 
         Optional<Customer> customer = customerService.getCustomerById(customer1Id);
@@ -68,7 +68,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testGetCustomerByEmail() {
+    void testGetCustomerByEmail() {
         when(customerRepository.findByEmail(customer1.getEmail())).thenReturn(customer1);
 
         Customer result = customerService.getCustomerByEmail(customer1.getEmail());
@@ -77,7 +77,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testRegisterCustomer() {
+    void testRegisterCustomer() {
         when(customerRepository.save(customer2)).thenReturn(customer2);
 
         Customer result = customerService.registerCustomer(customer2);
@@ -86,7 +86,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testDeleteCustomer() {
+    void testDeleteCustomer() {
         doNothing().when(customerRepository).deleteById(customer1Id);
 
         customerService.deleteCustomer(customer1Id);

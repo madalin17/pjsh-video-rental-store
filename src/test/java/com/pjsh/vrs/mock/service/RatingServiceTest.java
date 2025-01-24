@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RatingServiceTest {
+class RatingServiceTest {
 
     @Mock
     private RatingRepository ratingRepository;
@@ -53,7 +53,7 @@ public class RatingServiceTest {
     private int rating2Score;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         video1Id = 1L;
         video2Id = 2L;
         customer1Id = 1L;
@@ -66,7 +66,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testGetRatingsByVideoId() {
+    void testGetRatingsByVideoId() {
         when(ratingRepository.findByVideoId(video1Id)).thenReturn(List.of(rating1, rating2));
 
         List<Rating> ratings = ratingService.findByVideoId(video1Id);
@@ -77,7 +77,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testGetRatingsByCustomerId() {
+    void testGetRatingsByCustomerId() {
         when(ratingRepository.findByCustomerId(customer1Id)).thenReturn(List.of(rating1));
 
         List<Rating> ratings = ratingService.findByCustomerId(customer1Id);
@@ -87,7 +87,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testAddRating() {
+    void testAddRating() {
         when(ratingRepository.save(rating2)).thenReturn(rating2);
 
         Rating addedRating = ratingService.addRating(rating2);
@@ -97,7 +97,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testDeleteRating() {
+    void testDeleteRating() {
         doNothing().when(ratingRepository).deleteById(rating1Id);
 
         ratingService.deleteRating(rating1Id);
@@ -106,7 +106,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testDeleteAllByVideoId() {
+    void testDeleteAllByVideoId() {
         doNothing().when(ratingRepository).deleteAllByVideoId(video1Id);
 
         ratingService.deleteAllByVideoId(video1Id);
@@ -115,7 +115,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testDeleteAllByCustomerId() {
+    void testDeleteAllByCustomerId() {
         doNothing().when(ratingRepository).deleteAllByCustomerId(customer1Id);
 
         ratingService.deleteAllByCustomerId(customer1Id);
@@ -124,7 +124,7 @@ public class RatingServiceTest {
     }
 
     @Test
-    public void testGetAverageScoreByVideoId() {
+    void testGetAverageScoreByVideoId() {
         double averageScore = (double) (rating1Score + rating2Score) / 2;
         when(ratingRepository.calculateAverageScoreByVideoId(video1Id)).thenReturn(averageScore);
 

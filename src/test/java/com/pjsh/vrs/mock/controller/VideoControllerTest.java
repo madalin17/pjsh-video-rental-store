@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class VideoControllerTest {
+class VideoControllerTest {
 
     @Mock
     private VideoService videoService;
@@ -54,7 +54,7 @@ public class VideoControllerTest {
     private String video1Title;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(videoController).build();
 
         video1Id = 1L;
@@ -62,7 +62,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testGetAllVideos() throws Exception {
+    void testGetAllVideos() throws Exception {
         List<Video> videoList = Arrays.asList(video1, video2);
         when(videoService.getAllVideos()).thenReturn(videoList);
 
@@ -72,7 +72,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testGetVideoById() throws Exception {
+    void testGetVideoById() throws Exception {
         when(videoService.getVideoById(1L)).thenReturn(java.util.Optional.of(video1));
 
         mockMvc.perform(get("/videos/{id}", 1L))
@@ -81,7 +81,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testSearchVideosByTitle() throws Exception {
+    void testSearchVideosByTitle() throws Exception {
         when(videoService.searchVideosByTitle(video1Title)).thenReturn(Arrays.asList(video1));
 
         mockMvc.perform(get("/videos/search?title=" + video1Title))
@@ -90,7 +90,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testAddVideo() throws Exception {
+    void testAddVideo() throws Exception {
         when(videoService.addVideo(any(Video.class))).thenReturn(video1);
 
         mockMvc.perform(post("/videos")
@@ -101,7 +101,7 @@ public class VideoControllerTest {
     }
 
     @Test
-    public void testDeleteVideo() throws Exception {
+    void testDeleteVideo() throws Exception {
         doNothing().when(videoService).deleteVideo(1L);
 
         mockMvc.perform(delete("/videos/{id}", video1Id))

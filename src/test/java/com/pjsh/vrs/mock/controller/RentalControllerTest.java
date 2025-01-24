@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RentalControllerTest {
+class RentalControllerTest {
 
     @Mock
     private RentalService rentalService;
@@ -68,7 +68,7 @@ public class RentalControllerTest {
     private String customer2Username;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         mockMvc = MockMvcBuilders.standaloneSetup(rentalController).build();
 
         video1Id = 1L;
@@ -112,7 +112,7 @@ public class RentalControllerTest {
     }
 
     @Test
-    public void testRentVideo() throws Exception {
+    void testRentVideo() throws Exception {
         when(rentalService.rentVideo(customer2Id, video2Id)).thenReturn(rental3);
 
         mockMvc.perform(post("/rentals/rent")
@@ -125,14 +125,14 @@ public class RentalControllerTest {
     }
 
     @Test
-    public void testReturnVideo() throws Exception {
+    void testReturnVideo() throws Exception {
         mockMvc.perform(post("/rentals/return/{rentalId}", rental1Id))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testGetRentalHistory() throws Exception {
+    void testGetRentalHistory() throws Exception {
         mockMvc.perform(get("/rentals/history/{customerId}", customer1Id))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -142,7 +142,7 @@ public class RentalControllerTest {
     }
 
     @Test
-    public void testReturnVideoWithInvalidRentalId() throws Exception {
+    void testReturnVideoWithInvalidRentalId() throws Exception {
         when(rentalService.returnVideo(999L)).thenThrow(new IllegalStateException("Rental ID not found"));
 
         mockMvc.perform(post("/rentals/return/{rentalId}", 999L))
@@ -152,7 +152,7 @@ public class RentalControllerTest {
     }
 
     @Test
-    public void testGetRentalHistoryForNonExistentCustomer() throws Exception {
+    void testGetRentalHistoryForNonExistentCustomer() throws Exception {
         mockMvc.perform(get("/rentals/history/{customerId}", 999L))
                 .andDo(print())
                 .andExpect(status().isOk())

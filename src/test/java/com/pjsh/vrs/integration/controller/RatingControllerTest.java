@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
-public class RatingControllerTest {
+class RatingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -67,7 +67,7 @@ public class RatingControllerTest {
     private int rating3Score;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ratingRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
@@ -83,14 +83,14 @@ public class RatingControllerTest {
     }
 
     @AfterAll
-    public void cleanUp() {
+    void cleanUp() {
         ratingRepository.deleteAll();
         videoRepository.deleteAll();
         customerRepository.deleteAll();
     }
 
     @Test
-    public void testAddRating() throws Exception {
+    void testAddRating() throws Exception {
         RatingRequest request = new RatingRequest();
         request.setTitle(testVideo2.getTitle());
         request.setUsername(testCustomer1.getUsername());
@@ -105,7 +105,7 @@ public class RatingControllerTest {
     }
 
     @Test
-    public void testDeleteRating() throws Exception {
+    void testDeleteRating() throws Exception {
         mockMvc.perform(delete("/ratings/{id}", testRating1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -117,7 +117,7 @@ public class RatingControllerTest {
     }
 
     @Test
-    public void testGetRatingsByVideoId() throws Exception {
+    void testGetRatingsByVideoId() throws Exception {
         mockMvc.perform(get("/ratings/video/{videoId}", testVideo1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -125,7 +125,7 @@ public class RatingControllerTest {
     }
 
     @Test
-    public void testGetRatingsByCustomerId() throws Exception {
+    void testGetRatingsByCustomerId() throws Exception {
         mockMvc.perform(get("/ratings/customer/{customerId}", testCustomer1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -133,7 +133,7 @@ public class RatingControllerTest {
     }
 
     @Test
-    public void testDeleteAllByVideoId() throws Exception {
+    void testDeleteAllByVideoId() throws Exception {
         mockMvc.perform(delete("/ratings/video/all/{videoId}", testVideo1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -145,7 +145,7 @@ public class RatingControllerTest {
     }
 
     @Test
-    public void testDeleteAllByCustomerId() throws Exception {
+    void testDeleteAllByCustomerId() throws Exception {
         mockMvc.perform(delete("/ratings/customer/all/{customerId}", testCustomer1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -157,7 +157,7 @@ public class RatingControllerTest {
     }
 
     @Test
-    public void testGetAverageScoreByVideoId() throws Exception {
+    void testGetAverageScoreByVideoId() throws Exception {
         mockMvc.perform(get("/ratings/average/{id}", testVideo1.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
