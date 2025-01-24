@@ -1,6 +1,8 @@
 package com.pjsh.vrs.integration.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pjsh.vrs.controller.requests.RatingRequest;
+import com.pjsh.vrs.controller.requests.ReviewRequest;
 import com.pjsh.vrs.entity.Review;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.entity.Customer;
@@ -89,6 +91,21 @@ public class ReviewControllerTest {
     }
 
     @Test
+    public void testAddReview() throws Exception {
+        ReviewRequest request = new ReviewRequest();
+        request.setTitle(testVideo2.getTitle());
+        request.setUsername(testCustomer1.getUsername());
+        request.setDescription(review3Description);
+
+        mockMvc.perform(post("/reviews")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value(review3Description));
+    }
+
+    @Test
     public void testGetReviewsByVideoId() throws Exception {
         mockMvc.perform(get("/reviews/video/{videoId}", testVideo1.getId()))
                 .andDo(print())
@@ -105,18 +122,6 @@ public class ReviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].description").value(review1Description));
-    }
-
-    @Test
-    public void testAddReview() throws Exception {
-        Review review = new Review(testVideo2, testCustomer1, review3Description);
-
-        mockMvc.perform(post("/reviews")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(review)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value(review3Description));
     }
 
     @Test

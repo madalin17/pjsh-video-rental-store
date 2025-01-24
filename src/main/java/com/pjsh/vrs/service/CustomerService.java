@@ -33,5 +33,9 @@ public class CustomerService {
     public Customer getCustomerByEmail(String email) {
         return customerRepository.findByEmail(email);
     }
+
+    public Customer getByUsername(String username) {
+        return customerRepository.findByUsername(username);
+    }
 }
 

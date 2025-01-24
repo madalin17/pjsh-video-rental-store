@@ -70,10 +70,14 @@ public class RecommendationControllerTest {
     private String video1Title;
     @Value("${video2.title}")
     private String video2Title;
-    @Value("${rating1.score}")
-    private Integer rating1Score;
+    @Value("${video3.title}")
+    private String video3Title;
     @Value("${video4.title}")
     private String video4Title;
+    @Value("${video5.title}")
+    private String video5Title;
+    @Value("${rating1.score}")
+    private Integer rating1Score;
 
     @BeforeEach
     public void setUp() {
@@ -88,9 +92,6 @@ public class RecommendationControllerTest {
         testVideo5 = videoRepository.save(new Video(video5));
 
         testCustomer1 = customerRepository.save(new Customer(customer1));
-
-        rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
-        rentalService.rentVideo(testCustomer1.getId(), testVideo2.getId());
     }
 
     @AfterEach
@@ -102,14 +103,13 @@ public class RecommendationControllerTest {
 
     @Test
     public void testGetRecommendationsSuccess() throws Exception {
-
         rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
         rentalService.rentVideo(testCustomer1.getId(), testVideo2.getId());
 
         mockMvc.perform(get("/recommendations/{customerId}", testCustomer1.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isAccepted());
 
         Thread.sleep(1000);
 
@@ -117,8 +117,9 @@ public class RecommendationControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].title").value(video4Title));
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].title").value(video4Title))
+                .andExpect(jsonPath("$[1].title").value(video5Title));
     }
 
     @Test
@@ -126,14 +127,13 @@ public class RecommendationControllerTest {
         mockMvc.perform(get("/recommendations/{customerId}", testCustomer1.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isNoContent());
-    }
+                .andExpect(status().isAccepted());
 
-    @Test
-    public void testGetRecommendationsInternalServerError() throws Exception {
+        Thread.sleep(1000);
+
         mockMvc.perform(get("/recommendations/{customerId}", testCustomer1.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNoContent());
     }
 }

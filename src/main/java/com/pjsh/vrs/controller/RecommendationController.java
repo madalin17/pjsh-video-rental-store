@@ -7,7 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -18,20 +22,32 @@ public class RecommendationController {
     @Autowired
     private RecommendationService recommendationService;
 
+    private final ConcurrentHashMap<Long, CompletableFuture<List<Video>>> futures = new ConcurrentHashMap<>();
+
     @GetMapping("/{customerId}")
     public ResponseEntity<List<Video>> getRecommendations(@PathVariable Long customerId) {
-        try {
-            Future<List<Video>> recommendationsFuture = recommendationService.getRecommendationsForCustomer(customerId);
+        CompletableFuture<List<Video>> recommendationsFuture = futures.getOrDefault(customerId, null);
 
-            List<Video> recommendations = recommendationsFuture.get();
+        if (recommendationsFuture == null) {
+            recommendationsFuture = recommendationService.getRecommendationsForCustomer(customerId);
 
-            if (recommendations != null && !recommendations.isEmpty()) {
-                return new ResponseEntity<>(recommendations, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            futures.put(customerId, recommendationsFuture);
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.emptyList());
+        } else if (recommendationsFuture.isDone()) {
+            try {
+                List<Video> recommendations = recommendationsFuture.get();
+
+                if (recommendations == null || recommendations.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ArrayList<>());
+                }
+
+                return ResponseEntity.status(HttpStatus.OK).body(recommendations);
+            } catch (InterruptedException | ExecutionException e) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ArrayList<>());
             }
-        } catch (InterruptedException | ExecutionException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Collections.emptyList());
     }
 }

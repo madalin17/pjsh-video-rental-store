@@ -1,6 +1,7 @@
 package com.pjsh.vrs.integration.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pjsh.vrs.controller.requests.RatingRequest;
 import com.pjsh.vrs.entity.Rating;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.entity.Customer;
@@ -90,11 +91,14 @@ public class RatingControllerTest {
 
     @Test
     public void testAddRating() throws Exception {
-        Rating rating = new Rating(testVideo2, testCustomer1, rating3Score);
+        RatingRequest request = new RatingRequest();
+        request.setTitle(testVideo2.getTitle());
+        request.setUsername(testCustomer1.getUsername());
+        request.setScore(rating3Score);
 
         mockMvc.perform(post("/ratings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(rating)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.score").value(rating3Score));

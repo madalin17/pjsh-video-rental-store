@@ -43,9 +43,9 @@ public class RecommendationServiceTest {
     private RecommendationService recommendationService;
 
     @Autowired
-    private Video video1, video2, video3;
+    private Video video1, video2, video3, video4;
 
-    private Long video1Id, video2Id, video3Id, customer1Id;
+    private Long video1Id, video2Id, video3Id, video4Id, customer1Id;
 
     private List<Video> allVideos, recommendedVideos, rentedVideos;
 
@@ -54,10 +54,11 @@ public class RecommendationServiceTest {
         video1Id = 1L;
         video2Id = 2L;
         video3Id = 3L;
+        video4Id = 4L;
         customer1Id = 1L;
 
-        allVideos = List.of(video1, video2, video3);
-        recommendedVideos = List.of(video3);
+        allVideos = List.of(video1, video2, video3, video4);
+        recommendedVideos = List.of(video4);
         rentedVideos = List.of(video1);
 
         when(videoRepository.findAll()).thenReturn(allVideos);
@@ -112,9 +113,10 @@ public class RecommendationServiceTest {
         video1.setId(video1Id);
         video2.setId(video2Id);
         video3.setId(video3Id);
+        video4.setId(video4Id);
         List<Video> similarVideos = recommendationService.findSimilarVideos(video1, allVideos);
 
-        assertThat(similarVideos).contains(video3);
+        assertThat(similarVideos).contains(video4);
         assertThat(similarVideos).doesNotContain(video1, video2);
     }
 }

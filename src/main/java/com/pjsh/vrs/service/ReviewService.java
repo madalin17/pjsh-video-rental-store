@@ -1,6 +1,5 @@
 package com.pjsh.vrs.service;
 
-import com.pjsh.vrs.entity.Rating;
 import com.pjsh.vrs.entity.Review;
 import com.pjsh.vrs.storage.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,11 +44,44 @@ public class RecommendationService {
         return CompletableFuture.completedFuture(recommendedList);
     }
 
+//    @Async
+//    public CompletableFuture<List<Video>> getRecommendationsForCustomer(Long customerId) {
+//        return CompletableFuture.supplyAsync(() -> cacheService.getRecommendationsFromCache(customerId))
+//                .thenCompose(cachedRecommendations -> {
+//                    if (cachedRecommendations != null) {
+//                        return CompletableFuture.completedFuture(cachedRecommendations);
+//                    }
+//
+//                    CompletableFuture<List<Video>> allVideosFuture = CompletableFuture.supplyAsync(() -> videoRepository.findAll());
+//                    CompletableFuture<List<Video>> rentedVideosFuture = CompletableFuture.supplyAsync(() -> videoRepository.findRentedByCustomerId(customerId));
+//
+//                    return allVideosFuture.thenCombine(rentedVideosFuture, (allVideos, rentedVideos) -> {
+//                        Set<Video> recommendations = new HashSet<>();
+//                        for (Video rentedVideo : rentedVideos) {
+//                            recommendations.addAll(findSimilarVideos(rentedVideo, allVideos));
+//                        }
+//                        rentedVideos.forEach(recommendations::remove);
+//
+//                        List<Video> recommendedList = recommendations.stream().limit(10).toList();
+//
+//                        CompletableFuture.runAsync(() -> cacheService.storeRecommendationsInCache(customerId, recommendedList));
+//                        System.out.println(recommendedList);
+//
+//                        return recommendedList;
+//                    });
+//                });
+//    }
+
     public List<Video> findSimilarVideos(Video video, List<Video> allVideos) {
+        var similarVideos = allVideos.stream()
+                .filter(v -> !v.getId().equals(video.getId()))
+                .filter(v -> isSimilar(video, v))
+                .toList();
+        System.out.println("Found similar videos: " + similarVideos);
         return allVideos.stream()
                 .filter(v -> !v.getId().equals(video.getId()))
                 .filter(v -> isSimilar(video, v))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private boolean isSimilar(Video v1, Video v2) {
@@ -61,6 +95,6 @@ public class RecommendationService {
         List<String> actors2 = Arrays.asList(v2.getActors().split(","));
         if (!Collections.disjoint(actors1, actors2)) score += 2;
 
-        return score >= 3;
+        return score >= 5;
     }
 }

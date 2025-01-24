@@ -41,5 +41,9 @@ public class VideoService {
     public List<Video> getVideosByGenre(String genre) {
         return videoRepository.findByGenre(genre);
     }
+
+    public Video getByTitle(String title) {
+        return videoRepository.findByTitle(title);
+    }
 }
 

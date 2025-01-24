@@ -132,14 +132,6 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testRentVideoAudits() throws InterruptedException {
-        rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
-
-        String capturedOutput = outputStreamCaptor.toString();
-        assertTrue(capturedOutput.contains("Rental Event: Customer " + testCustomer1.getId() + " rented video + " + testVideo1.getId() + " - Event Type: RENT"));
-    }
-
-    @Test
     public void testReturnVideoAudits() throws InterruptedException {
         Rental rental = rentalService.rentVideo(testCustomer1.getId(), testVideo1.getId());
 

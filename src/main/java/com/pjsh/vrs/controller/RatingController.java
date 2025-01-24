@@ -1,7 +1,12 @@
 package com.pjsh.vrs.controller;
 
+import com.pjsh.vrs.controller.requests.RatingRequest;
+import com.pjsh.vrs.entity.Customer;
 import com.pjsh.vrs.entity.Rating;
+import com.pjsh.vrs.entity.Video;
+import com.pjsh.vrs.service.CustomerService;
 import com.pjsh.vrs.service.RatingService;
+import com.pjsh.vrs.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +17,27 @@ import java.util.List;
 public class RatingController {
 
     @Autowired
+    private VideoService videoService;
+
+    @Autowired
+    private CustomerService customerService;
+
+    @Autowired
     private RatingService ratingService;
 
     @PostMapping
-    public Rating addRating(@RequestBody Rating rating) {
+    public Rating addRating(@RequestBody RatingRequest request) {
+        Video video = videoService.getByTitle(request.getTitle());
+        if (video == null) {
+            throw new IllegalArgumentException("Video not found");
+        }
+
+        Customer customer = customerService.getByUsername(request.getUsername());
+        if (customer == null) {
+            throw new IllegalArgumentException("Customer not found");
+        }
+
+        Rating rating = new Rating(video, customer, request.getScore());
         return ratingService.addRating(rating);
     }
 

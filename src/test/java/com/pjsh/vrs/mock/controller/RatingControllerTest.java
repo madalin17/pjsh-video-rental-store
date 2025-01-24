@@ -2,10 +2,13 @@ package com.pjsh.vrs.mock.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pjsh.vrs.controller.RatingController;
+import com.pjsh.vrs.controller.requests.RatingRequest;
 import com.pjsh.vrs.entity.Rating;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.entity.Customer;
+import com.pjsh.vrs.service.CustomerService;
 import com.pjsh.vrs.service.RatingService;
+import com.pjsh.vrs.service.VideoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +39,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
 public class RatingControllerTest {
+
+    @Mock
+    private VideoService videoService;
+
+    @Mock
+    private CustomerService customerService;
 
     @Mock
     private RatingService ratingService;
@@ -78,15 +87,30 @@ public class RatingControllerTest {
         rating1 = new Rating(video1, customer1, rating1Score);
         rating2 = new Rating(video1, customer2, rating2Score);
 
+        RatingRequest request1 = new RatingRequest();
+        request1.setTitle(rating1.getVideo().getTitle());
+        request1.setUsername(rating1.getCustomer().getUsername());
+        request1.setScore(rating1.getScore());
+
+        RatingRequest request2 = new RatingRequest();
+        request2.setTitle(rating2.getVideo().getTitle());
+        request2.setUsername(rating2.getCustomer().getUsername());
+        request2.setScore(rating2.getScore());
+
+        when(videoService.getByTitle(video1.getTitle())).thenReturn(video1);
+        when(videoService.getByTitle(video2.getTitle())).thenReturn(video2);
+        when(customerService.getByUsername(customer1.getUsername())).thenReturn(customer1);
+        when(customerService.getByUsername(customer2.getUsername())).thenReturn(customer2);
+
         mockMvc.perform(post("/ratings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(rating1)))
+                        .content(objectMapper.writeValueAsString(request1)))
                 .andDo(print())
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/ratings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(rating2)))
+                        .content(objectMapper.writeValueAsString(request2)))
                 .andDo(print())
                 .andExpect(status().isOk());
 
@@ -97,11 +121,14 @@ public class RatingControllerTest {
 
     @Test
     public void testAddRating() throws Exception {
-        Rating rating3 = new Rating(video2, customer1, rating3Score);
+        RatingRequest request = new RatingRequest();
+        request.setTitle(video2.getTitle());
+        request.setUsername(customer1.getUsername());
+        request.setScore(rating3Score);
 
         mockMvc.perform(post("/ratings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(rating3)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk());
     }

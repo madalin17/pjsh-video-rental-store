@@ -2,10 +2,14 @@ package com.pjsh.vrs.mock.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pjsh.vrs.controller.ReviewController;
+import com.pjsh.vrs.controller.requests.ReviewRequest;
 import com.pjsh.vrs.entity.Review;
 import com.pjsh.vrs.entity.Video;
 import com.pjsh.vrs.entity.Customer;
+import com.pjsh.vrs.service.CustomerService;
+import com.pjsh.vrs.service.RatingService;
 import com.pjsh.vrs.service.ReviewService;
+import com.pjsh.vrs.service.VideoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +40,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @ContextConfiguration(locations = "classpath:test-context.xml")
 @TestPropertySource("classpath:test.properties")
 public class ReviewControllerTest {
+
+    @Mock
+    private VideoService videoService;
+
+    @Mock
+    private CustomerService customerService;
 
     @Mock
     private ReviewService reviewService;
@@ -84,11 +94,17 @@ public class ReviewControllerTest {
 
     @Test
     public void testAddReview() throws Exception {
-        Review review3 = new Review(video2, customer2, review3Description);
+        ReviewRequest request = new ReviewRequest();
+        request.setTitle(video2.getTitle());
+        request.setUsername(customer2.getUsername());
+        request.setDescription(review3Description);
+
+        when(videoService.getByTitle(video2.getTitle())).thenReturn(video2);
+        when(customerService.getByUsername(customer2.getUsername())).thenReturn(customer2);
 
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(review3)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk());
     }

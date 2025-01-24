@@ -60,6 +60,7 @@ public class RecommendationControllerTest {
 
     @Test
     public void testGetRecommendationsSuccess() throws Exception {
+
         when(recommendationService.getRecommendationsForCustomer(customer1Id)).thenReturn(CompletableFuture.completedFuture(List.of(video1, video2)));
 
         mockMvc.perform(get("/recommendations/{customerId}", customer1Id))

@@ -23,9 +23,9 @@ public class Review extends Interaction {
         builder
                 .append("\n")
                 .append("\n\tvideo = ")
-                .append(super.getVideo())
+                .append(super.getVideo().toString())
                 .append("\n\tcustomer = ")
-                .append(super.getCustomer())
+                .append(super.getCustomer().toString())
                 .append("\n\tdescription = ")
                 .append(description);
 
